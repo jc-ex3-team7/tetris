@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 typedef enum {
     T,
     S,
