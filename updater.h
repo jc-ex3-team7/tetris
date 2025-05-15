@@ -39,7 +39,7 @@ typedef struct {
     int free_fall_interval;
 } State;
 
-TetrisType next_mino_type();
+Mino next_mino();
 
 Mino move_mino(Mino current, Operation op);
 

@@ -23,6 +23,57 @@ TetrisType next_mino_type() {
     return mino_bag[mino_bag_index++];
 }
 
+Mino next_mino() {
+    TetrisType type = next_mino_type();
+    bool block[4][4] = {0};
+
+    switch (type) {
+        case T:
+            block[1][1] = true;
+            block[2][0] = true;
+            block[2][1] = true;
+            block[2][2] = true;
+            break;
+        case S:
+            block[1][1] = true;
+            block[1][2] = true;
+            block[2][0] = true;
+            block[2][1] = true;
+            break;
+        case Z:
+            block[1][0] = true;
+            block[1][1] = true;
+            block[2][1] = true;
+            block[2][2] = true;
+            break;
+        case L:
+            block[1][2] = true;
+            block[2][0] = true;
+            block[2][1] = true;
+            block[2][2] = true;
+            break;
+        case J:
+            block[1][0] = true;
+            block[2][0] = true;
+            block[2][1] = true;
+            block[2][2] = true;
+            break;
+        case O:
+            block[1][1] = true;
+            block[1][2] = true;
+            block[2][1] = true;
+            block[2][2] = true;
+            break;
+        case I:
+            block[2][0] = true;
+            block[2][1] = true;
+            block[2][2] = true;
+            block[2][3] = true;
+            break;
+    }
+    return (Mino){type, {4, 0}, block};
+}
+
 State next_state(State current_state, Operation op) {
     // Handle user operation
     Mino moved = move_mino(current_state.mino, op);
