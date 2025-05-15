@@ -193,3 +193,7 @@ Mino move_mino(Mino current, Operation op) {
 
     return (Mino){type, position, next_block};
 }
+
+void update(unsigned long long tick_count, char player_input) {
+    // TODO: Implement the update logic
+}
