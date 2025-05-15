@@ -1,6 +1,27 @@
 #include "updater.h"
 
 #include <stdbool.h>
+#include <stdlib.h>
+
+TetrisType mino_bag[7];
+unsigned char mino_bag_index = 7;
+
+TetrisType next_mino_type() {
+    TetrisType temp;
+    if (mino_bag_index >= 7) {
+        for (int i = 0; i < 7; i++) {
+            mino_bag[i] = i;
+        }
+        for (int i = 0; i < 7; i++) {
+            int j = rand() % 7;
+            temp = mino_bag[i];
+            mino_bag[i] = mino_bag[j];
+            mino_bag[j] = temp;
+        }
+        mino_bag_index = 0;
+    }
+    return mino_bag[mino_bag_index++];
+}
 
 State next_state(State current_state, Operation op) {
     // Handle user operation
