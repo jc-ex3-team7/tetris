@@ -24,54 +24,57 @@ TetrisType next_mino_type() {
 }
 
 Mino next_mino() {
-    TetrisType type = next_mino_type();
-    bool block[4][4] = {0};
+    Mino res = {0};
+    res.type = next_mino_type();
+    res.position.x = 4;
+    res.position.y = 0;
 
-    switch (type) {
+    switch (res.type) {
         case T:
-            block[1][1] = true;
-            block[2][0] = true;
-            block[2][1] = true;
-            block[2][2] = true;
+            res.block[1][1] = true;
+            res.block[2][0] = true;
+            res.block[2][1] = true;
+            res.block[2][2] = true;
             break;
         case S:
-            block[1][1] = true;
-            block[1][2] = true;
-            block[2][0] = true;
-            block[2][1] = true;
+            res.block[1][1] = true;
+            res.block[1][2] = true;
+            res.block[2][0] = true;
+            res.block[2][1] = true;
             break;
         case Z:
-            block[1][0] = true;
-            block[1][1] = true;
-            block[2][1] = true;
-            block[2][2] = true;
+            res.block[1][0] = true;
+            res.block[1][1] = true;
+            res.block[2][1] = true;
+            res.block[2][2] = true;
             break;
         case L:
-            block[1][2] = true;
-            block[2][0] = true;
-            block[2][1] = true;
-            block[2][2] = true;
+            res.block[1][2] = true;
+            res.block[2][0] = true;
+            res.block[2][1] = true;
+            res.block[2][2] = true;
             break;
         case J:
-            block[1][0] = true;
-            block[2][0] = true;
-            block[2][1] = true;
-            block[2][2] = true;
+            res.block[1][0] = true;
+            res.block[2][0] = true;
+            res.block[2][1] = true;
+            res.block[2][2] = true;
             break;
         case O:
-            block[1][1] = true;
-            block[1][2] = true;
-            block[2][1] = true;
-            block[2][2] = true;
+            res.block[1][1] = true;
+            res.block[1][2] = true;
+            res.block[2][1] = true;
+            res.block[2][2] = true;
             break;
         case I:
-            block[2][0] = true;
-            block[2][1] = true;
-            block[2][2] = true;
-            block[2][3] = true;
+            res.block[2][0] = true;
+            res.block[2][1] = true;
+            res.block[2][2] = true;
+            res.block[2][3] = true;
             break;
     }
-    return (Mino){type, {4, 0}, block};
+
+    return res;
 }
 
 State next_state(State current_state, Operation op) {
@@ -105,7 +108,7 @@ State next_state(State current_state, Operation op) {
         current_state.free_fall_tick++;
     }
 
-    int cleared_lines = clear_lines(current_state.field);
+    int cleared_lines = clear_lines((bool **)current_state.field);
     if (cleared_lines > 0) {
         // TODO: score points
         switch (cleared_lines) {
@@ -147,19 +150,25 @@ bool is_mino_position_valid(bool field[20][10], Mino mino) {
 }
 
 Mino move_mino(Mino current, Operation op) {
-    TetrisType type = current.type;
-    Position position = current.position;
-    bool next_block[4][4] = {0};
+    Mino res = {0};
+
+    res.type = current.type;
+    res.position = current.position;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            res.block[i][j] = current.block[i][j];
+        }
+    }
 
     switch (op) {
         case Right:
-            position.x++;
+            res.position.x++;
             break;
         case Left:
-            position.x--;
+            res.position.x--;
             break;
         case RotateLeft:
-            switch (type) {
+            switch (res.type) {
                 case T:
                 case S:
                 case Z:
@@ -167,7 +176,7 @@ Mino move_mino(Mino current, Operation op) {
                 case J:
                     for (int y = 0; y < 3; y++)
                         for (int x = 0; x < 3; x++) {
-                            next_block[3 - x][y] = current.block[y + 1][x];
+                            res.block[x + 1][2 - y] = current.block[y + 1][x];
                         }
                     break;
                 case O:
@@ -175,14 +184,14 @@ Mino move_mino(Mino current, Operation op) {
                 case I:
                     for (int y = 0; y < 4; y++) {
                         for (int x = 0; x < 4; x++) {
-                            next_block[3 - x][y] = current.block[y][x];
+                            res.block[x][3 - y] = current.block[y][x];
                         }
                     }
                     break;
             }
             break;
         case RotateRight:
-            switch (type) {
+            switch (res.type) {
                 case T:
                 case S:
                 case Z:
@@ -190,7 +199,7 @@ Mino move_mino(Mino current, Operation op) {
                 case J:
                     for (int y = 0; y < 3; y++)
                         for (int x = 0; x < 3; x++) {
-                            next_block[x + 1][2 - y] = current.block[y + 1][x];
+                            res.block[3 - x][y] = current.block[y + 1][x];
                         }
                     break;
                 case O:
@@ -198,21 +207,23 @@ Mino move_mino(Mino current, Operation op) {
                 case I:
                     for (int y = 0; y < 4; y++) {
                         for (int x = 0; x < 4; x++) {
-                            next_block[x][3 - y] = current.block[y][x];
+                            res.block[3 - x][y] = current.block[y][x];
                         }
                     }
                     break;
             }
             break;
         case Down:
-            position.y++;
+            res.position.y++;
+            break;
+        default:
             break;
     }
 
-    return (Mino){type, position, next_block};
+    return res;
 }
 
-int clear_line(bool **field) {
+int clear_lines(bool **field) {
     int lines_cleared = 0;
     for (int i = 0; i < 20; i++) {
         bool full_line = true;
