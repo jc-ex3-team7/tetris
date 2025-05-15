@@ -108,7 +108,7 @@ State next_state(State current_state, Operation op) {
         current_state.free_fall_tick++;
     }
 
-    int cleared_lines = clear_lines((bool **)current_state.field);
+    int cleared_lines = clear_lines(current_state.field);
     if (cleared_lines > 0) {
         // TODO: score points
         switch (cleared_lines) {
@@ -223,7 +223,7 @@ Mino move_mino(Mino current, Operation op) {
     return res;
 }
 
-int clear_lines(bool **field) {
+int clear_lines(bool field[20][10]) {
     int lines_cleared = 0;
     for (int i = 0; i < 20; i++) {
         bool full_line = true;
