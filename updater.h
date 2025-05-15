@@ -25,6 +25,7 @@ typedef enum {
     None,
     Right,
     Left,
+    Down,
     RotateLeft,
     RotateRight,
     Drop,
@@ -33,6 +34,9 @@ typedef enum {
 typedef struct {
     bool field[20][10];
     Mino mino;
+
+    int free_fall_tick;
+    int free_fall_interval;
 } State;
 
 Mino move_mino(Mino current, Operation op);
