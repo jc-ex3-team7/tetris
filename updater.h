@@ -31,9 +31,13 @@ typedef enum {
     Drop,
 } Operation;
 
+typedef enum { Playing, LockDelay, Spawning, GameOver } GamePhase;
+
 typedef struct {
     bool field[20][10];
     Mino mino;
+
+    GamePhase phase;
 
     int free_fall_tick;
     int free_fall_interval;

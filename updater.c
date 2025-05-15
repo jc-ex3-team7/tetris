@@ -75,6 +75,13 @@ Mino next_mino() {
 }
 
 State next_state(State current_state, Operation op) {
+    if (current_state.phase == Spawning) {
+        current_state.mino = next_mino();
+        current_state.phase = Playing;
+
+        return current_state;
+    }
+
     // Handle user operation
     Mino moved = move_mino(current_state.mino, op);
     if (is_mino_position_valid(current_state.field, moved)) {
