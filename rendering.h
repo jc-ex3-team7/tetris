@@ -1,3 +1,3 @@
 #include "updater.h"
 
-void render_field(State state);
+void render(State state);

@@ -68,7 +68,7 @@ void set_color_named(Color bg) {
 
 void clear_screen() { printf("\033[H\033[2J"); }
 
-void render_field(State state) {
+void render(State state) {
     clear_screen();
 
     Color field_with_frame[22][12];

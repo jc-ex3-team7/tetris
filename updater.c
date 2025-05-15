@@ -236,7 +236,3 @@ int clear_line(bool **field) {
     }
     return lines_cleared;
 }
-
-void update(unsigned long long tick_count, char player_input) {
-    // TODO: Implement the update logic
-}
