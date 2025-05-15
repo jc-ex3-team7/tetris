@@ -53,3 +53,5 @@ bool is_mino_position_valid(bool field[20][10], Mino mino);
 int clear_lines(bool **field);
 
 State next_state(State current_state, Operation op);
+
+void update(unsigned long long tick_count, char player_input);
