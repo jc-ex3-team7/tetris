@@ -46,7 +46,10 @@ State next_state(State current_state, Operation op) {
         current_state.free_fall_tick++;
     }
 
-    // TODO: Check for complete lines
+    int cleared_lines = clear_lines(current_state.field);
+    if (cleared_lines > 0) {
+        // TODO: score points
+    }
 
     return current_state;
 }

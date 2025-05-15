@@ -45,6 +45,7 @@ Mino move_mino(Mino current, Operation op);
 
 bool is_mino_position_valid(bool field[20][10], Mino mino);
 
-int get_complete_line(bool field[20][10]);
+// returns the nnumber of lines cleared
+int clear_lines(bool **field);
 
 State next_state(State current_state, Operation op);
