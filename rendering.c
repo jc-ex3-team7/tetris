@@ -19,7 +19,6 @@ typedef enum {
     LIGHT_GREEN,
     GRAY,
     DARK_GRAY,
-    DEFAULT
 } Color;
 
 int color_to_code(Color color) {
@@ -54,15 +53,13 @@ int color_to_code(Color color) {
             return 245;
         case DARK_GRAY:
             return 238;
-        case DEFAULT:
-            return 9;  // default terminal color (not 256 color)
         default:
-            return 9;
+            return 0;
     }
 }
 
 void set_color_named(Color bg) {
-    int bg_code = color256_to_code(bg);
+    int bg_code = color_to_code(bg);
     printf("\x1b[48;5;%dm", bg_code);
 }
 
@@ -73,21 +70,20 @@ void render(State state) {
 
     Color field_with_frame[22][12];
 
-    // Initialize the field with the default color
     for (int y = 0; y < 22; y++) {
         for (int x = 0; x < 12; x++) {
-            field_with_frame[y][x] = DEFAULT;
+            field_with_frame[y][x] = BLACK;
         }
     }
 
     // Set the frame color
     for (int y = 0; y < 22; y++) {
-        field_with_frame[y][0] = BLACK;
-        field_with_frame[y][11] = BLACK;
+        field_with_frame[y][0] = WHITE;
+        field_with_frame[y][11] = WHITE;
     }
     for (int x = 0; x < 12; x++) {
-        field_with_frame[0][x] = BLACK;
-        field_with_frame[21][x] = BLACK;
+        field_with_frame[0][x] = WHITE;
+        field_with_frame[21][x] = WHITE;
     }
 
     // merge the mino with the field
@@ -138,4 +134,7 @@ void render(State state) {
         }
         printf("\n");
     }
+
+    // reset color
+    printf("\x1b[0m");
 }
