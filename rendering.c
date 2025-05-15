@@ -63,11 +63,10 @@ void set_color_named(Color bg) {
     printf("\x1b[48;5;%dm", bg_code);
 }
 
-void clear_screen() { printf("\033[H\033[2J"); }
+static Color prev_field[22][12];
+static bool initialized = false;
 
 void render(State state) {
-    clear_screen();
-
     Color field_with_frame[22][12];
 
     for (int y = 0; y < 22; y++) {
@@ -129,12 +128,22 @@ void render(State state) {
     // Print the field with frame
     for (int y = 0; y < 22; y++) {
         for (int x = 0; x < 12; x++) {
-            set_color_named(field_with_frame[y][x]);
-            printf("  ");
+            // differential update
+            if (!initialized || field_with_frame[y][x] != prev_field[y][x]) {
+                // move cursor
+                printf("\x1b[%d;%dH", y + 1, x * 2 + 1);
+
+                set_color_named(field_with_frame[y][x]);
+                printf("  ");
+
+                prev_field[y][x] = field_with_frame[y][x];
+            }
         }
-        printf("\n");
     }
+    initialized = true;
 
     // reset color
     printf("\x1b[0m");
+    printf("\x1b[23;1H");
+    fflush(stdout);
 }
