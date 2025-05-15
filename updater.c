@@ -7,14 +7,13 @@ TetrisType mino_bag[7];
 unsigned char mino_bag_index = 7;
 
 TetrisType next_mino_type() {
-    TetrisType temp;
     if (mino_bag_index >= 7) {
         for (int i = 0; i < 7; i++) {
             mino_bag[i] = i;
         }
-        for (int i = 0; i < 7; i++) {
-            int j = rand() % 7;
-            temp = mino_bag[i];
+        for (int i = 6; i > 0; i--) {
+            int j = rand() % (i + 1);
+            TetrisType temp = mino_bag[i];
             mino_bag[i] = mino_bag[j];
             mino_bag[j] = temp;
         }
