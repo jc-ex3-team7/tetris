@@ -45,3 +45,69 @@ bool is_mino_position_valid(bool field[20][10], Mino mino) {
     }
     return true;
 }
+
+Mino move_mino(Mino current, Operation op) {
+    TetrisType type = current.type;
+    Position position = current.position;
+    bool next_block[4][4] = {0};
+
+    switch (op) {
+        case Right:
+            position.x++;
+            break;
+        case Left:
+            position.x--;
+            break;
+        case RotateLeft:
+            switch (type) {
+                case T:
+                case S:
+                case Z:
+                case L:
+                case J:
+                    for (int y = 0; y < 3; y++)
+                        for (int x = 0; x < 3; x++) {
+                            next_block[3 - x][y] = current.block[y + 1][x];
+                        }
+                    break;
+                case O:
+                    break;
+                case I:
+                    for (int y = 0; y < 4; y++) {
+                        for (int x = 0; x < 4; x++) {
+                            next_block[3 - x][y] = current.block[y][x];
+                        }
+                    }
+                    break;
+            }
+            break;
+        case RotateRight:
+            switch (type) {
+                case T:
+                case S:
+                case Z:
+                case L:
+                case J:
+                    for (int y = 0; y < 3; y++)
+                        for (int x = 0; x < 3; x++) {
+                            next_block[x + 1][2 - y] = current.block[y + 1][x];
+                        }
+                    break;
+                case O:
+                    break;
+                case I:
+                    for (int y = 0; y < 4; y++) {
+                        for (int x = 0; x < 4; x++) {
+                            next_block[x][3 - y] = current.block[y][x];
+                        }
+                    }
+                    break;
+            }
+            break;
+        case Down:
+            position.y++;
+            break;
+    }
+
+    return (Mino){type, position, next_block};
+}
