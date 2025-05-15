@@ -88,6 +88,7 @@ State next_state(State current_state, Operation op) {
         current_state.mino = moved;
     } else if (op == Drop) {
         // TODO: logic to handle hard drop
+
         // TODO: lock the mino in place
     }
 
@@ -107,6 +108,23 @@ State next_state(State current_state, Operation op) {
     int cleared_lines = clear_lines(current_state.field);
     if (cleared_lines > 0) {
         // TODO: score points
+        switch (cleared_lines) {
+            case 1:
+                current_state.score += 100;
+                break;
+            case 2:
+                current_state.score += 300;
+                break;
+            case 3:
+                current_state.score += 500;
+                break;
+            case 4:
+                current_state.score += 800;
+                break;
+            default:
+                current_state.score += 0;
+                break;
+        }
     }
 
     return current_state;
@@ -192,6 +210,31 @@ Mino move_mino(Mino current, Operation op) {
     }
 
     return (Mino){type, position, next_block};
+}
+
+int clear_line(bool **field) {
+    int lines_cleared = 0;
+    for (int i = 0; i < 20; i++) {
+        bool full_line = true;
+        for (int j = 0; j < 10; j++) {
+            if (!field[i][j]) {
+                full_line = false;
+                break;
+            }
+        }
+        if (full_line) {
+            lines_cleared++;
+            for (int k = i; k > 0; k--) {
+                for (int j = 0; j < 10; j++) {
+                    field[k][j] = field[k - 1][j];
+                }
+            }
+            for (int j = 0; j < 10; j++) {
+                field[0][j] = false;
+            }
+        }
+    }
+    return lines_cleared;
 }
 
 void update(unsigned long long tick_count, char player_input) {

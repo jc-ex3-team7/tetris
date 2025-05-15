@@ -41,6 +41,7 @@ typedef struct {
 
     int free_fall_tick;
     int free_fall_interval;
+    int score;
 } State;
 
 Mino next_mino();
