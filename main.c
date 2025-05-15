@@ -1,7 +1,7 @@
 #include "io.h"
 #include "updater.h"
 
-#define TICK_INTERVAL 10
+#define TICK_INTERVAL 50
 
 unsigned long long TICK_COUNT = 0;
 char last_player_input = 0;
