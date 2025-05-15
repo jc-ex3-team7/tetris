@@ -22,6 +22,7 @@ typedef struct {
 } Mino;
 
 typedef enum {
+    None,
     Right,
     Left,
     RotateLeft,
@@ -29,10 +30,15 @@ typedef enum {
     Drop,
 } Operation;
 
+typedef struct {
+    bool field[20][10];
+    Mino mino;
+} State;
+
 Mino move_mino(Mino current, Operation op);
 
-bool is_valid_state(bool field[20][10], Mino mino);
+bool is_mino_position_valid(bool field[20][10], Mino mino);
 
 int get_complete_line(bool field[20][10]);
 
-void update_field(bool **field);
+State next_state(State current_state, Operation op);
