@@ -1,6 +1,5 @@
 #include <stdbool.h>
 #include <stdio.h>
-#include <string.h>
 
 #include "updater.h"
 
@@ -21,52 +20,82 @@
 #define GRAY 13
 #define DARK_GRAY 14
 
-int color_to_code(Color color) {
+int color_to_code(char* out, Color color) {
+    out[0] = '\x1b';
+    out[1] = '[';
+    out[2] = '3';
+    out[3] = '8';
+    out[4] = ';';
+    out[5] = '5';
+    out[6] = ';';
+    int index = 7;
     switch (color) {
         case BLACK:
-            return 0;
-        case RED:
-            return 1;
-        case GREEN:
-            return 2;
-        case YELLOW:
-            return 3;
-        case BLUE:
-            return 4;
-        case MAGENTA:
-            return 5;
-        case CYAN:
-            return 6;
-        case WHITE:
-            return 7;
-        case ORANGE:
-            return 208;
-        case PINK:
-            return 218;
-        case BROWN:
-            return 94;
-        case LIGHT_BLUE:
-            return 81;
-        case LIGHT_GREEN:
-            return 120;
-        case GRAY:
-            return 245;
-        case DARK_GRAY:
-            return 238;
         default:
-            return 0;
+            out[0] = '\x1b';
+            out[1] = '[';
+            out[2] = '0';
+            out[3] = 'm';
+            out[4] = '\0';
+            return 4;
+        case RED:
+            out[index++] = '1';
+            break;
+        case GREEN:
+            out[index++] = '2';
+            break;
+        case YELLOW:
+            out[index++] = '3';
+            break;
+        case BLUE:
+            out[index++] = '4';
+            break;
+        case MAGENTA:
+            out[index++] = '5';
+            break;
+        case CYAN:
+            out[index++] = '6';
+            break;
+        case WHITE:
+            out[index++] = '7';
+            break;
+        case ORANGE:
+            out[index++] = '2';
+            out[index++] = '0';
+            out[index++] = '8';
+            break;
+        case PINK:
+            out[index++] = '2';
+            out[index++] = '1';
+            out[index++] = '8';
+            break;
+        case BROWN:
+            out[index++] = '9';
+            out[index++] = '4';
+            break;
+        case LIGHT_BLUE:
+            out[index++] = '8';
+            out[index++] = '1';
+            break;
+        case LIGHT_GREEN:
+            out[index++] = '1';
+            out[index++] = '2';
+            out[index++] = '0';
+            break;
+        case GRAY:
+            out[index++] = '2';
+            out[index++] = '4';
+            out[index++] = '5';
+            break;
+        case DARK_GRAY:
+            out[index++] = '2';
+            out[index++] = '3';
+            out[index++] = '8';
+            break;
     }
-}
-
-// ANSI エスケープシーケンスを生成（背景色指定）
-void get_color_named(char* out, Color bg) {
-    int code = color_to_code(bg);
-    if (code == 0) {
-        snprintf(out, sizeof out, "\x1b[0m");
-    } else {
-        // 前景色ではなく背景色(48)を使用するとスペースで色が見える
-        snprintf(out, sizeof out, "\x1b[38;5;%dm", code);
-    }
+    out[index++] = 'm';
+    out[index] = '\0';
+    return index;
 }
 
 #define BUFFER_SIZE 128
@@ -75,8 +104,7 @@ static int RENDER_BUFFER_INDEX = 0;
 static Color COLOR_FIELD[22][12];
 
 // 出力をバッファリングし、必要時にフラッシュ
-void buffered_print(const char* arg, bool flush) {
-    int len = strlen(arg);
+void buffered_print(const char* arg, int len, bool flush) {
     if (RENDER_BUFFER_INDEX + len >= BUFFER_SIZE) {
         RENDER_BUFFER[RENDER_BUFFER_INDEX] = '\0';
         printf("%s", RENDER_BUFFER);
@@ -97,8 +125,8 @@ void render(State state) {
     memset(RENDER_BUFFER, 0, BUFFER_SIZE);
     RENDER_BUFFER_INDEX = 0;
     // 画面クリア
-    buffered_print("\x1b[2J", false);
-    buffered_print("\x1b[H", false);
+    buffered_print("\x1b[2J", 4, false);
+    buffered_print("\x1b[H", 3, false);
 
     // フィールドの枠をセット
     for (int y = 0; y < 22; y++) {
@@ -155,24 +183,25 @@ void render(State state) {
 
     // 描画ループ
     char color_buffer[16];
+    int buffered_len = 0;
     Color prev_color = WHITE;
     // バッファに色をセット
     for (int y = 0; y < 22; y++) {
         prev_color = WHITE;
-        get_color_named(color_buffer, WHITE);
-        buffered_print(color_buffer, false);
+        buffered_len = color_to_code(color_buffer, WHITE);
+        buffered_print(color_buffer, buffered_len, false);
         for (int x = 0; x < 12; x++) {
             if (COLOR_FIELD[y][x] != prev_color) {
-                get_color_named(color_buffer, COLOR_FIELD[y][x]);
-                buffered_print(color_buffer, false);
+                buffered_len = color_to_code(color_buffer, COLOR_FIELD[y][x]);
+                buffered_print(color_buffer, buffered_len, false);
                 prev_color = COLOR_FIELD[y][x];
             }
-            buffered_print("XX", false);
+            buffered_print("  ", 2, false);
         }
         // 行末にリセットと改行を挿入
-        buffered_print("\x1b[0m\n", false);
+        buffered_print("\x1b[0m\n", 5, false);
     }
 
     // 最終フラッシュ
-    buffered_print("", true);
+    buffered_print("", 0, true);
 }
