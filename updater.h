@@ -57,7 +57,5 @@ int clear_lines(bool field[20][10]);
 
 State next_state(State current_state, Operation op);
 
-void update(unsigned long long tick_count, char player_input);
-
 void hard_drop(State *state);
 void lock_mino(State *state);

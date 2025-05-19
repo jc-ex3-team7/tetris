@@ -267,7 +267,3 @@ void lock_mino(State *state) {
     }
     state->phase = Spawning;
 }
-
-void update(unsigned long long tick_count, char player_input) {
-    // TODO: Implement the update logic
-}
