@@ -65,7 +65,7 @@ void get_color_named(char* out, Color bg) {
         snprintf(out, sizeof out, "\x1b[0m");
     } else {
         // 前景色ではなく背景色(48)を使用するとスペースで色が見える
-        snprintf(out, sizeof out, "\x1b[48;5;%dm", code);
+        snprintf(out, sizeof out, "\x1b[38;5;%dm", code);
     }
 }
 
