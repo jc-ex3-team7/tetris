@@ -59,16 +59,14 @@ int color_to_code(Color color) {
 }
 
 // ANSI エスケープシーケンスを生成（背景色指定）
-char* get_color_named(Color bg) {
-    static char buf[16];
+void get_color_named(char* out, Color bg) {
     int code = color_to_code(bg);
     if (code == 0) {
-        snprintf(buf, sizeof buf, "\x1b[0m");
+        snprintf(out, sizeof out, "\x1b[0m");
     } else {
         // 前景色ではなく背景色(48)を使用するとスペースで色が見える
-        snprintf(buf, sizeof buf, "\x1b[48;5;%dm", code);
+        snprintf(out, sizeof out, "\x1b[48;5;%dm", code);
     }
-    return buf;
 }
 
 #define BUFFER_SIZE 128
@@ -156,18 +154,23 @@ void render(State state) {
     }
 
     // 描画ループ
-    Color prev_color = -1;
+    char color_buffer[16];
+    Color prev_color = WHITE;
+    // バッファに色をセット
     for (int y = 0; y < 22; y++) {
+        prev_color = WHITE;
+        get_color_named(color_buffer, WHITE);
+        buffered_print(color_buffer, false);
         for (int x = 0; x < 12; x++) {
             if (COLOR_FIELD[y][x] != prev_color) {
-                buffered_print(get_color_named(COLOR_FIELD[y][x]), false);
+                get_color_named(color_buffer, COLOR_FIELD[y][x]);
+                buffered_print(color_buffer, false);
                 prev_color = COLOR_FIELD[y][x];
             }
-            buffered_print("  ", false);
+            buffered_print("XX", false);
         }
         // 行末にリセットと改行を挿入
         buffered_print("\x1b[0m\n", false);
-        prev_color = -1;
     }
 
     // 最終フラッシュ
