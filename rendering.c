@@ -68,7 +68,7 @@ char* get_color_named(Color bg) {
 
 #define BUFFER_SIZE 2048
 static char RENDER_BUFFER[BUFFER_SIZE];
-static COLOR_FIELD[22][12];
+static Color COLOR_FIELD[22][12];
 
 void render(State state) {
     // Clear the buffer
