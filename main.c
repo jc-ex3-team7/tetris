@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "io.h"
 #include "rendering.h"
 #include "updater.h"
@@ -63,8 +65,6 @@ int main() {
     set_mtimer_interval(TICK_INTERVAL /*msec*/);
     timer_interrupt_hook = timer_handler;
     enable_timer_interrupt();
-    int timer_on = 1;
-    printf("timer on\n");
     while (1) {
         if (io_getch()) {
             last_player_input = io_getch();
