@@ -66,21 +66,41 @@ char* get_color_named(Color bg) {
 
 // 文字列として出力をbufferに格納してから出力する
 
-#define BUFFER_SIZE 2048
+#define BUFFER_SIZE 128
 static char RENDER_BUFFER[BUFFER_SIZE];
 static Color COLOR_FIELD[22][12];
+static RENDER_BUFFER_INDEX = 0;
+
+void buffered_print(const char* arg, bool flush) {
+    // 文字列をバッファに格納する
+    // bufferが112バイト以上の時は、bufferを出力してクリアする
+    int len = strlen(arg);
+    if (RENDER_BUFFER_INDEX + len >= BUFFER_SIZE) {
+        // バッファを出力する
+        if (RENDER_BUFFER_INDEX < BUFFER_SIZE) {
+            RENDER_BUFFER[RENDER_BUFFER_INDEX] = '\0';
+        }
+        printf("%s", RENDER_BUFFER);
+        RENDER_BUFFER_INDEX = 0;
+    }
+    // バッファに格納する
+    snprintf(RENDER_BUFFER + RENDER_BUFFER_INDEX, BUFFER_SIZE - RENDER_BUFFER_INDEX, "%s", arg);
+    RENDER_BUFFER_INDEX += len;
+    // flushがtrueの時は、バッファを出力してクリアする
+    if (flush) {
+        printf("%s", RENDER_BUFFER);
+        RENDER_BUFFER_INDEX = 0;
+    }
+}
 
 void render(State state) {
-    // Clear the buffer
+    // Render with buffered_print
+    //  Clear the buffer
     memset(RENDER_BUFFER, 0, BUFFER_SIZE);
-    int index = 0;
-
+    RENDER_BUFFER_INDEX = 0;
     // clear the screen
-    snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[2J");
-    index += strlen(RENDER_BUFFER + index);
-    snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[H");
-    index += strlen(RENDER_BUFFER + index);
-
+    buffered_print("\x1b[2J", false);
+    buffered_print("\x1b[H", false);
     // Set the frame color
     for (int y = 0; y < 22; y++) {
         for (int x = 0; x < 12; x++) {
@@ -91,7 +111,6 @@ void render(State state) {
             }
         }
     }
-
     // merge the mino with the field
     for (int y = 0; y < 20; y++) {
         for (int x = 0; x < 10; x++) {
@@ -100,7 +119,6 @@ void render(State state) {
             }
         }
     }
-
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (state.mino.block[i][j]) {
@@ -132,41 +150,120 @@ void render(State state) {
             }
         }
     }
-
     // Print the field with frame
+    Color prev_color = WHITE;
+    // buffered_print White
+    buffered_print(get_color_named(WHITE), false);
     for (int y = 0; y < 22; y++) {
         for (int x = 0; x < 12; x++) {
-            // move cursor
-            snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[%d;%dH", y + 1, x * 2 + 1);
-            index += strlen(RENDER_BUFFER + index);
-
             // set color
-            snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, get_color_named(COLOR_FIELD[y][x]),
-                     color_to_code(COLOR_FIELD[y][x]));
-            index += strlen(RENDER_BUFFER + index);
-
-            snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "  ");
-            index += strlen(RENDER_BUFFER + index);
+            if (COLOR_FIELD[y][x] != prev_color) {
+                buffered_print(get_color_named(COLOR_FIELD[y][x]), false);
+                prev_color = COLOR_FIELD[y][x];
+            }
+            buffered_print("  ", false);
         }
     }
-
-    // reset color
-    snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[0m");
-    index += strlen(RENDER_BUFFER + index);
-    snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[23;1H");
-    index += strlen(RENDER_BUFFER + index);
-    // Add end of line
-    snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\n");
-    index += strlen(RENDER_BUFFER + index);
-    // Add flush command
-    snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[0m");
-    index += strlen(RENDER_BUFFER + index);
-    // Add end of string
-    RENDER_BUFFER[index] = '\0';
-    index++;
-    // Print the buffer
-    printf("%s", RENDER_BUFFER);
+    buffered_print("", true);
 }
+
+// void render(State state) {
+//     // Clear the buffer
+//     memset(RENDER_BUFFER, 0, BUFFER_SIZE);
+//     int index = 0;
+
+//     // clear the screen
+//     snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[2J");
+//     index += strlen(RENDER_BUFFER + index);
+//     snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[H");
+//     index += strlen(RENDER_BUFFER + index);
+
+//     // Set the frame color
+//     for (int y = 0; y < 22; y++) {
+//         for (int x = 0; x < 12; x++) {
+//             if (y == 0 || y == 21 || x == 0 || x == 11) {
+//                 COLOR_FIELD[y][x] = WHITE;
+//             } else {
+//                 COLOR_FIELD[y][x] = BLACK;
+//             }
+//         }
+//     }
+
+//     // merge the mino with the field
+//     for (int y = 0; y < 20; y++) {
+//         for (int x = 0; x < 10; x++) {
+//             if (state.field[y][x]) {
+//                 COLOR_FIELD[y + 1][x + 1] = WHITE;
+//             }
+//         }
+//     }
+
+//     for (int i = 0; i < 4; i++) {
+//         for (int j = 0; j < 4; j++) {
+//             if (state.mino.block[i][j]) {
+//                 int y = state.mino.position.y + i;
+//                 int x = state.mino.position.x + j;
+//                 switch (state.mino.type) {
+//                     case T:
+//                         COLOR_FIELD[y + 1][x + 1] = MAGENTA;
+//                         break;
+//                     case S:
+//                         COLOR_FIELD[y + 1][x + 1] = GREEN;
+//                         break;
+//                     case Z:
+//                         COLOR_FIELD[y + 1][x + 1] = RED;
+//                         break;
+//                     case L:
+//                         COLOR_FIELD[y + 1][x + 1] = ORANGE;
+//                         break;
+//                     case J:
+//                         COLOR_FIELD[y + 1][x + 1] = BLUE;
+//                         break;
+//                     case O:
+//                         COLOR_FIELD[y + 1][x + 1] = YELLOW;
+//                         break;
+//                     case I:
+//                         COLOR_FIELD[y + 1][x + 1] = CYAN;
+//                         break;
+//                 }
+//             }
+//         }
+//     }
+
+//     // Print the field with frame
+//     for (int y = 0; y < 22; y++) {
+//         for (int x = 0; x < 12; x++) {
+//             // move cursor
+//             snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[%d;%dH", y + 1, x * 2 + 1);
+//             index += strlen(RENDER_BUFFER + index);
+
+//             // set color
+//             snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, get_color_named(COLOR_FIELD[y][x]),
+//                      color_to_code(COLOR_FIELD[y][x]));
+//             index += strlen(RENDER_BUFFER + index);
+
+//             snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "  ");
+//             index += strlen(RENDER_BUFFER + index);
+//         }
+//     }
+
+//     // reset color
+//     snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[0m");
+//     index += strlen(RENDER_BUFFER + index);
+//     snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[23;1H");
+//     index += strlen(RENDER_BUFFER + index);
+//     // Add end of line
+//     snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\n");
+//     index += strlen(RENDER_BUFFER + index);
+//     // Add flush command
+//     snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[0m");
+//     index += strlen(RENDER_BUFFER + index);
+//     // Add end of string
+//     RENDER_BUFFER[index] = '\0';
+//     index++;
+//     // Print the buffer
+//     printf("%s", RENDER_BUFFER);
+// }
 
 // void set_color_named(Color bg) {
 //     int bg_code = color_to_code(bg);
