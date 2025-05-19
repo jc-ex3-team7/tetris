@@ -103,6 +103,7 @@ State next_state(State current_state, Operation op) {
             current_state.free_fall_tick = 0;
         } else {
             // TODO: logic to lock the mino in place
+            lock_mino(&current_state);
         }
     } else {
         current_state.free_fall_tick++;
