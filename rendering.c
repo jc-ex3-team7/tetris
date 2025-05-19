@@ -1,8 +1,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <termios.h>
-#include <unistd.h>
 
 #include "updater.h"
 
@@ -182,8 +180,8 @@ void buffered_print(const char *arg, int len, bool flush) {
 
 // 描画関数
 void render(State state) {
-    // 入力バッファをクリア
-    tcflush(STDIN_FILENO, TCIFLUSH);
+    // 入力バッファをクリア（fflush で代替）
+    fflush(stdin);
     // カーソル非表示
     hide_cursor();
 
@@ -262,7 +260,7 @@ void render(State state) {
     } else {
         // 差分更新
         for (y = 0; y < 22; ++y) {
-            for (x = 0; x < 12; ++x) {
+            for (int x = 0; x < 12; ++x) {
                 if (COLOR_FIELD[y][x] != PREV_COLOR_FIELD[y][x]) {
                     len = move_cursor_code(cs_buf, y + 1, x * 2 + 1);
                     buffered_print(cs_buf, len, false);
