@@ -42,7 +42,7 @@ void *memcpy(void *dest, const void *src, size_t n) {
 int color_to_code(char *out, Color color) {
     out[0] = '\x1b';
     out[1] = '[';
-    out[2] = '3';
+    out[2] = '4';
     out[3] = '8';
     out[4] = ';';
     out[5] = '5';
@@ -117,7 +117,7 @@ int color_to_code(char *out, Color color) {
     return index;
 }
 
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 512
 static char RENDER_BUFFER[BUFFER_SIZE];
 static int RENDER_BUFFER_INDEX = 0;
 static Color COLOR_FIELD[22][12];
