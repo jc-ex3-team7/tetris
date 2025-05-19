@@ -1,6 +1,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
 
 #include "updater.h"
 
@@ -124,6 +126,10 @@ static Color COLOR_FIELD[22][12];
 static Color PREV_COLOR_FIELD[22][12];
 static bool first_render = true;
 
+// カーソルの非表示／表示
+static void hide_cursor(void) { buffered_print("\x1b[?25l", 6, false); }
+static void show_cursor(void) { buffered_print("\x1b[?25h", 6, false); }
+
 // 簡易的整数→文字列変換
 static int int_to_str(int num, char *buf) {
     int len = 0;
@@ -176,6 +182,11 @@ void buffered_print(const char *arg, int len, bool flush) {
 
 // 描画関数
 void render(State state) {
+    // 入力バッファをクリア
+    tcflush(STDIN_FILENO, TCIFLUSH);
+    // カーソル非表示
+    hide_cursor();
+
     // フィールドの準備
     for (int y = 0; y < 22; ++y) {
         for (int x = 0; x < 12; ++x) {
@@ -248,7 +259,6 @@ void render(State state) {
             }
             buffered_print("\x1b[0m\n", 5, false);
         }
-        buffered_print("", 0, true);
     } else {
         // 差分更新
         for (y = 0; y < 22; ++y) {
@@ -262,12 +272,16 @@ void render(State state) {
                 }
             }
         }
-        buffered_print("\x1b[0m", 4, false);
-        // カーソルを画面下に
-        len = move_cursor_code(cs_buf, 23, 1);
-        buffered_print(cs_buf, len, false);
-        buffered_print("", 0, true);
     }
+
+    // リセット＋カーソルを画面下に
+    buffered_print("\x1b[0m", 4, false);
+    len = move_cursor_code(cs_buf, 23, 1);
+    buffered_print(cs_buf, len, false);
+
+    // カーソル再表示＆フラッシュ
+    show_cursor();
+    buffered_print("", 0, true);
 
     // 前回バッファを更新
     for (y = 0; y < 22; ++y) {
