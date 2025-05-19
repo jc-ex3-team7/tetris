@@ -88,7 +88,8 @@ State next_state(State current_state, Operation op) {
     Mino moved = move_mino(current_state.mino, op);
     if (is_mino_position_valid(current_state.field, moved)) {
         current_state.mino = moved;
-    } else if (op == Drop) {
+    }
+    if (op == Drop) {
         // TODO: logic to handle hard drop
         hard_drop(&current_state);
         // TODO: lock the mino in place
