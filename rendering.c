@@ -69,11 +69,11 @@ char* get_color_named(Color bg) {
 #define BUFFER_SIZE 128
 static char RENDER_BUFFER[BUFFER_SIZE];
 static Color COLOR_FIELD[22][12];
-static RENDER_BUFFER_INDEX = 0;
+static int RENDER_BUFFER_INDEX = 0;
 
 void buffered_print(const char* arg, bool flush) {
     // 文字列をバッファに格納する
-    // bufferが112バイト以上の時は、bufferを出力してクリアする
+    // bufferが溢れそうな時は、bufferを出力してクリアする
     int len = strlen(arg);
     if (RENDER_BUFFER_INDEX + len >= BUFFER_SIZE) {
         // バッファを出力する
