@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "updater.h"
 
@@ -58,41 +59,49 @@ int color_to_code(Color color) {
     }
 }
 
-void set_color_named(Color bg) {
+char* get_color_named(Color bg) {
     int bg_code = color_to_code(bg);
-    printf("\x1b[48;5;%dm", bg_code);
+    return bg_code == 0 ? "\x1b[0m" : "\x1b[38;5;%dm";
 }
 
-static Color prev_field[22][12];
-static bool initialized = false;
+// 文字列として出力をbufferに格納してから出力する
+//
+static BUFFER_SIZE = 2048;
+static char buffer[BUFFER_SIZE];
+static int index = 0;
+static COLOR_FIELD[22][12];
 
 void render(State state) {
-    Color field_with_frame[22][12];
+    // Clear the buffer
+    memset(buffer, 0, BUFFER_SIZE);
+    index = 0;
 
-    for (int y = 0; y < 22; y++) {
-        for (int x = 0; x < 12; x++) {
-            field_with_frame[y][x] = BLACK;
-        }
-    }
+    // clear the screen
+    snprintf(buffer + index, BUFFER_SIZE - index, "\x1b[2J");
+    index += strlen(buffer + index);
+    snprintf(buffer + index, BUFFER_SIZE - index, "\x1b[H");
+    index += strlen(buffer + index);
 
     // Set the frame color
     for (int y = 0; y < 22; y++) {
-        field_with_frame[y][0] = WHITE;
-        field_with_frame[y][11] = WHITE;
-    }
-    for (int x = 0; x < 12; x++) {
-        field_with_frame[0][x] = WHITE;
-        field_with_frame[21][x] = WHITE;
+        for (int x = 0; x < 12; x++) {
+            if (y == 0 || y == 21 || x == 0 || x == 11) {
+                COLOR_FIELD[y][x] = WHITE;
+            } else {
+                COLOR_FIELD[y][x] = BLACK;
+            }
+        }
     }
 
     // merge the mino with the field
     for (int y = 0; y < 20; y++) {
         for (int x = 0; x < 10; x++) {
             if (state.field[y][x]) {
-                field_with_frame[y + 1][x + 1] = WHITE;
+                COLOR_FIELD[y + 1][x + 1] = WHITE;
             }
         }
     }
+
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (state.mino.block[i][j]) {
@@ -100,25 +109,25 @@ void render(State state) {
                 int x = state.mino.position.x + j;
                 switch (state.mino.type) {
                     case T:
-                        field_with_frame[y + 1][x + 1] = MAGENTA;
+                        COLOR_FIELD[y + 1][x + 1] = MAGENTA;
                         break;
                     case S:
-                        field_with_frame[y + 1][x + 1] = GREEN;
+                        COLOR_FIELD[y + 1][x + 1] = GREEN;
                         break;
                     case Z:
-                        field_with_frame[y + 1][x + 1] = RED;
+                        COLOR_FIELD[y + 1][x + 1] = RED;
                         break;
                     case L:
-                        field_with_frame[y + 1][x + 1] = ORANGE;
+                        COLOR_FIELD[y + 1][x + 1] = ORANGE;
                         break;
                     case J:
-                        field_with_frame[y + 1][x + 1] = BLUE;
+                        COLOR_FIELD[y + 1][x + 1] = BLUE;
                         break;
                     case O:
-                        field_with_frame[y + 1][x + 1] = YELLOW;
+                        COLOR_FIELD[y + 1][x + 1] = YELLOW;
                         break;
                     case I:
-                        field_with_frame[y + 1][x + 1] = CYAN;
+                        COLOR_FIELD[y + 1][x + 1] = CYAN;
                         break;
                 }
             }
@@ -128,22 +137,124 @@ void render(State state) {
     // Print the field with frame
     for (int y = 0; y < 22; y++) {
         for (int x = 0; x < 12; x++) {
-            // differential update
-            if (!initialized || field_with_frame[y][x] != prev_field[y][x]) {
-                // move cursor
-                printf("\x1b[%d;%dH", y + 1, x * 2 + 1);
+            // move cursor
+            snprintf(buffer + index, BUFFER_SIZE - index, "\x1b[%d;%dH", y + 1, x * 2 + 1);
+            index += strlen(buffer + index);
 
-                set_color_named(field_with_frame[y][x]);
-                printf("  ");
+            // set color
+            snprintf(buffer + index, BUFFER_SIZE - index, get_color_named(COLOR_FIELD[y][x]),
+                     color_to_code(COLOR_FIELD[y][x]));
+            index += strlen(buffer + index);
 
-                prev_field[y][x] = field_with_frame[y][x];
-            }
+            snprintf(buffer + index, BUFFER_SIZE - index, "  ");
+            index += strlen(buffer + index);
         }
     }
-    initialized = true;
 
     // reset color
-    printf("\x1b[0m");
-    printf("\x1b[23;1H");
-    fflush(stdout);
+    snprintf(buffer + index, BUFFER_SIZE - index, "\x1b[0m");
+    index += strlen(buffer + index);
+    snprintf(buffer + index, BUFFER_SIZE - index, "\x1b[23;1H");
+    index += strlen(buffer + index);
+    // Add end of line
+    snprintf(buffer + index, BUFFER_SIZE - index, "\n");
+    index += strlen(buffer + index);
+    // Add flush command
+    snprintf(buffer + index, BUFFER_SIZE - index, "\x1b[0m");
+    index += strlen(buffer + index);
+    // Add end of string
+    buffer[index] = '\0';
+    index++;
+    // Print the buffer
+    printf("%s", buffer);
 }
+
+// void set_color_named(Color bg) {
+//     int bg_code = color_to_code(bg);
+//     printf("\x1b[48;5;%dm", bg_code);
+// }
+
+// static Color prev_field[22][12];
+// static bool initialized = false;
+
+// void render(State state) {
+//     Color field_with_frame[22][12];
+
+//     for (int y = 0; y < 22; y++) {
+//         for (int x = 0; x < 12; x++) {
+//             field_with_frame[y][x] = BLACK;
+//         }
+//     }
+
+//     // Set the frame color
+//     for (int y = 0; y < 22; y++) {
+//         field_with_frame[y][0] = WHITE;
+//         field_with_frame[y][11] = WHITE;
+//     }
+//     for (int x = 0; x < 12; x++) {
+//         field_with_frame[0][x] = WHITE;
+//         field_with_frame[21][x] = WHITE;
+//     }
+
+//     // merge the mino with the field
+//     for (int y = 0; y < 20; y++) {
+//         for (int x = 0; x < 10; x++) {
+//             if (state.field[y][x]) {
+//                 field_with_frame[y + 1][x + 1] = WHITE;
+//             }
+//         }
+//     }
+//     for (int i = 0; i < 4; i++) {
+//         for (int j = 0; j < 4; j++) {
+//             if (state.mino.block[i][j]) {
+//                 int y = state.mino.position.y + i;
+//                 int x = state.mino.position.x + j;
+//                 switch (state.mino.type) {
+//                     case T:
+//                         field_with_frame[y + 1][x + 1] = MAGENTA;
+//                         break;
+//                     case S:
+//                         field_with_frame[y + 1][x + 1] = GREEN;
+//                         break;
+//                     case Z:
+//                         field_with_frame[y + 1][x + 1] = RED;
+//                         break;
+//                     case L:
+//                         field_with_frame[y + 1][x + 1] = ORANGE;
+//                         break;
+//                     case J:
+//                         field_with_frame[y + 1][x + 1] = BLUE;
+//                         break;
+//                     case O:
+//                         field_with_frame[y + 1][x + 1] = YELLOW;
+//                         break;
+//                     case I:
+//                         field_with_frame[y + 1][x + 1] = CYAN;
+//                         break;
+//                 }
+//             }
+//         }
+//     }
+
+//     // Print the field with frame
+//     for (int y = 0; y < 22; y++) {
+//         for (int x = 0; x < 12; x++) {
+//             // differential update
+//             if (!initialized || field_with_frame[y][x] != prev_field[y][x]) {
+//                 // move cursor
+//                 printf("\x1b[%d;%dH", y + 1, x * 2 + 1);
+
+//                 set_color_named(field_with_frame[y][x]);
+//                 printf("  ");
+
+//                 prev_field[y][x] = field_with_frame[y][x];
+//             }
+//         }
+//     }
+//     initialized = true;
+
+//     // reset color
+//     printf("\x1b[0m");
+//     printf("\x1b[23;1H");
+//     fflush(stdout);
+// }
