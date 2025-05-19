@@ -4,23 +4,40 @@
 
 #include "updater.h"
 
-typedef enum {
-    BLACK,
-    WHITE,
-    RED,
-    GREEN,
-    BLUE,
-    YELLOW,
-    CYAN,
-    MAGENTA,
-    ORANGE,
-    PINK,
-    BROWN,
-    LIGHT_BLUE,
-    LIGHT_GREEN,
-    GRAY,
-    DARK_GRAY,
-} Color;
+#define Color unsigned char
+#define BLACK 0
+#define WHITE 1
+#define RED 2
+#define GREEN 3
+#define BLUE 4
+#define YELLOW 5
+#define CYAN 6
+#define MAGENTA 7
+#define ORANGE 8
+#define PINK 9
+#define BROWN 10
+#define LIGHT_BLUE 11
+#define LIGHT_GREEN 12
+#define GRAY 13
+#define DARK_GRAY 14
+
+// typedef enum {
+//     BLACK,
+//     WHITE,
+//     RED,
+//     GREEN,
+//     BLUE,
+//     YELLOW,
+//     CYAN,
+//     MAGENTA,
+//     ORANGE,
+//     PINK,
+//     BROWN,s
+//     LIGHT_BLUE,
+//     LIGHT_GREEN,
+//     GRAY,
+//     DARK_GRAY,
+// } Color;
 
 int color_to_code(Color color) {
     switch (color) {
