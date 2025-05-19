@@ -90,8 +90,9 @@ State next_state(State current_state, Operation op) {
         current_state.mino = moved;
     } else if (op == Drop) {
         // TODO: logic to handle hard drop
-
+        hard_drop(&current_state);
         // TODO: lock the mino in place
+        lock_mino(&current_state);
     }
 
     // Handle free fall
@@ -245,4 +246,27 @@ int clear_lines(bool field[20][10]) {
         }
     }
     return lines_cleared;
+}
+
+void hard_drop(State *state) {
+    while (is_mino_position_valid(state->field, move_mino(state->mino, Down))) {
+        state->mino.position.y++;
+    }
+}
+
+void lock_mino(State *state) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (state->mino.block[i][j]) {
+                int y = state->mino.position.y + i;
+                int x = state->mino.position.x + j;
+                state->field[y][x] = true;
+            }
+        }
+    }
+    state->phase = Spawning;
+}
+
+void update(unsigned long long tick_count, char player_input) {
+    // TODO: Implement the update logic
 }
