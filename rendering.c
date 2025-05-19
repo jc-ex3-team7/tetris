@@ -65,22 +65,21 @@ char* get_color_named(Color bg) {
 }
 
 // 文字列として出力をbufferに格納してから出力する
-//
-static BUFFER_SIZE = 2048;
-static char buffer[BUFFER_SIZE];
-static int index = 0;
+
+#define BUFFER_SIZE 2048
+static char RENDER_BUFFER[BUFFER_SIZE];
 static COLOR_FIELD[22][12];
 
 void render(State state) {
     // Clear the buffer
-    memset(buffer, 0, BUFFER_SIZE);
-    index = 0;
+    memset(RENDER_BUFFER, 0, BUFFER_SIZE);
+    int index = 0;
 
     // clear the screen
-    snprintf(buffer + index, BUFFER_SIZE - index, "\x1b[2J");
-    index += strlen(buffer + index);
-    snprintf(buffer + index, BUFFER_SIZE - index, "\x1b[H");
-    index += strlen(buffer + index);
+    snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[2J");
+    index += strlen(RENDER_BUFFER + index);
+    snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[H");
+    index += strlen(RENDER_BUFFER + index);
 
     // Set the frame color
     for (int y = 0; y < 22; y++) {
@@ -138,35 +137,35 @@ void render(State state) {
     for (int y = 0; y < 22; y++) {
         for (int x = 0; x < 12; x++) {
             // move cursor
-            snprintf(buffer + index, BUFFER_SIZE - index, "\x1b[%d;%dH", y + 1, x * 2 + 1);
-            index += strlen(buffer + index);
+            snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[%d;%dH", y + 1, x * 2 + 1);
+            index += strlen(RENDER_BUFFER + index);
 
             // set color
-            snprintf(buffer + index, BUFFER_SIZE - index, get_color_named(COLOR_FIELD[y][x]),
+            snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, get_color_named(COLOR_FIELD[y][x]),
                      color_to_code(COLOR_FIELD[y][x]));
-            index += strlen(buffer + index);
+            index += strlen(RENDER_BUFFER + index);
 
-            snprintf(buffer + index, BUFFER_SIZE - index, "  ");
-            index += strlen(buffer + index);
+            snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "  ");
+            index += strlen(RENDER_BUFFER + index);
         }
     }
 
     // reset color
-    snprintf(buffer + index, BUFFER_SIZE - index, "\x1b[0m");
-    index += strlen(buffer + index);
-    snprintf(buffer + index, BUFFER_SIZE - index, "\x1b[23;1H");
-    index += strlen(buffer + index);
+    snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[0m");
+    index += strlen(RENDER_BUFFER + index);
+    snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[23;1H");
+    index += strlen(RENDER_BUFFER + index);
     // Add end of line
-    snprintf(buffer + index, BUFFER_SIZE - index, "\n");
-    index += strlen(buffer + index);
+    snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\n");
+    index += strlen(RENDER_BUFFER + index);
     // Add flush command
-    snprintf(buffer + index, BUFFER_SIZE - index, "\x1b[0m");
-    index += strlen(buffer + index);
+    snprintf(RENDER_BUFFER + index, BUFFER_SIZE - index, "\x1b[0m");
+    index += strlen(RENDER_BUFFER + index);
     // Add end of string
-    buffer[index] = '\0';
+    RENDER_BUFFER[index] = '\0';
     index++;
     // Print the buffer
-    printf("%s", buffer);
+    printf("%s", RENDER_BUFFER);
 }
 
 // void set_color_named(Color bg) {
