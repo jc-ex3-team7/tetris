@@ -1,7 +1,26 @@
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 
 #include "updater.h"
+
+void *memset(void *s, int c, size_t n) {
+    unsigned char *p = (unsigned char *)s;
+    unsigned char uc = (unsigned char)c;
+    while (n--) {
+        *p++ = uc;
+    }
+    return s;
+}
+
+void *memcpy(void *dest, const void *src, size_t n) {
+    unsigned char *d = (unsigned char *)dest;
+    const unsigned char *s = (const unsigned char *)src;
+    while (n--) {
+        *d++ = *s++;
+    }
+    return dest;
+}
 
 #define Color unsigned char
 #define BLACK 0
@@ -20,7 +39,7 @@
 #define GRAY 13
 #define DARK_GRAY 14
 
-int color_to_code(char* out, Color color) {
+int color_to_code(char *out, Color color) {
     out[0] = '\x1b';
     out[1] = '[';
     out[2] = '3';
@@ -104,7 +123,7 @@ static int RENDER_BUFFER_INDEX = 0;
 static Color COLOR_FIELD[22][12];
 
 // 出力をバッファリングし、必要時にフラッシュ
-void buffered_print(const char* arg, int len, bool flush) {
+void buffered_print(const char *arg, int len, bool flush) {
     if (RENDER_BUFFER_INDEX + len >= BUFFER_SIZE) {
         RENDER_BUFFER[RENDER_BUFFER_INDEX] = '\0';
         printf("%s", RENDER_BUFFER);
