@@ -124,10 +124,6 @@ static Color COLOR_FIELD[22][12];
 static Color PREV_COLOR_FIELD[22][12];
 static bool first_render = true;
 
-// カーソルの非表示／表示
-static void hide_cursor(void) { buffered_print("\x1b[?25l", 6, false); }
-static void show_cursor(void) { buffered_print("\x1b[?25h", 6, false); }
-
 // 簡易的整数→文字列変換
 static int int_to_str(int num, char *buf) {
     int len = 0;
@@ -177,6 +173,10 @@ void buffered_print(const char *arg, int len, bool flush) {
         RENDER_BUFFER_INDEX = 0;
     }
 }
+
+// カーソルの非表示／表示
+static void hide_cursor(void) { buffered_print("\x1b[?25l", 6, false); }
+static void show_cursor(void) { buffered_print("\x1b[?25h", 6, false); }
 
 // 描画関数
 void render(State state) {
