@@ -76,12 +76,16 @@ Mino next_mino() {
     return res;
 }
 
-State next_state(State current_state, Operation op) {
+Output next_state(State current_state, Operation op, int attack_lines) {  // TODO: handle attack_lines
+    Output res = {0};
+    res.state = current_state;
+
     if (current_state.phase == Spawning) {
         current_state.mino = next_mino();
         current_state.phase = Playing;
 
-        return current_state;
+        res.state = current_state;
+        return res;
     }
 
     // Handle user operation
@@ -90,9 +94,7 @@ State next_state(State current_state, Operation op) {
         current_state.mino = moved;
     }
     if (op == Drop) {
-        // TODO: logic to handle hard drop
         hard_drop(&current_state);
-        // TODO: lock the mino in place
         lock_mino(&current_state);
     }
 
@@ -112,6 +114,7 @@ State next_state(State current_state, Operation op) {
 
     int cleared_lines = clear_lines(current_state.field);
     if (cleared_lines > 0) {
+        res.linesToSend = cleared_lines;
         // TODO: score points
         switch (cleared_lines) {
             case 1:
@@ -132,7 +135,8 @@ State next_state(State current_state, Operation op) {
         }
     }
 
-    return current_state;
+    res.state = current_state;
+    return res;
 }
 
 bool is_mino_position_valid(bool field[20][10], Mino mino) {

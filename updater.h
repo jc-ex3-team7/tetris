@@ -46,6 +46,11 @@ typedef struct {
     int score;
 } State;
 
+typedef struct {
+    State state;
+    int linesToSend;
+} Output;
+
 Mino next_mino();
 
 Mino move_mino(Mino current, Operation op);
@@ -55,7 +60,7 @@ bool is_mino_position_valid(bool field[20][10], Mino mino);
 // returns the nnumber of lines cleared
 int clear_lines(bool field[20][10]);
 
-State next_state(State current_state, Operation op);
+Output next_state(State current_state, Operation op, int attack_lines);
 
 void hard_drop(State *state);
 void lock_mino(State *state);

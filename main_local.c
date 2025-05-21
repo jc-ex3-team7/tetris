@@ -37,7 +37,8 @@ void update(unsigned long long tick_count, char player_input) {
             break;
     }
 
-    current_state = next_state(current_state, op);
+    Output output = next_state(current_state, op, 0);
+    current_state = output.state;
 
     render(current_state);
 }
