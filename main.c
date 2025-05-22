@@ -1,3 +1,9 @@
+#if defined(NATIVE_MODE)
+
+int main() {}
+
+#else
+
 #include <stdio.h>
 
 #include "io.h"
@@ -65,11 +71,14 @@ int main() {
     set_mtimer_interval(TICK_INTERVAL /*msec*/);
     timer_interrupt_hook = timer_handler;
     enable_timer_interrupt();
+    char c;
     while (1) {
-        if (io_getch()) {
-            last_player_input = io_getch();
+        if (c = io_getch()) {
+            last_player_input = c;
         }
     }
 #endif
     return 0;
 }
+
+#endif
