@@ -48,6 +48,13 @@ void update(unsigned long long tick_count, char player_input) {
     current_state = output.state;
 
     render(current_state);
+
+    if (current_state.phase == GameOver) {
+        printf("\x1b[0m");
+        printf("Game Over!\n");
+        return;
+    }
+
     fflush(stdout);
 }
 
@@ -68,6 +75,9 @@ void init() {
 }
 
 void timer_handler() {
+    if (current_state.phase == GameOver) {
+        return;
+    }
     update(TICK_COUNT, last_player_input);
     last_player_input = 0;
     TICK_COUNT++;

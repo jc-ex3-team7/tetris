@@ -25,7 +25,7 @@ TetrisType next_mino_type() {
 Mino next_mino() {
     Mino res = {0};
     res.type = next_mino_type();
-    res.position.x = 4;
+    res.position.x = 3;
     res.position.y = 0;
 
     switch (res.type) {
@@ -76,6 +76,8 @@ Mino next_mino() {
     return res;
 }
 
+static bool can_spawn_mino(State *state, Mino mino) { return is_mino_position_valid(state->field, mino); }
+
 static void handle_spawning_phase(State *state) {
     // handle the opponent's attack
     if (state->attack_lines > 0) {
@@ -98,6 +100,10 @@ static void handle_spawning_phase(State *state) {
     }
 
     state->mino = next_mino();
+    if (!can_spawn_mino(state, state->mino)) {
+        state->phase = GameOver;
+        return;
+    }
     state->phase = Playing;
 }
 
@@ -117,6 +123,11 @@ Output next_state(State current_state, Operation op, int attack_lines) {  // TOD
     Output res = {0};
     res.state = current_state;
     current_state.attack_lines += attack_lines;
+
+    if (current_state.phase == GameOver) {
+        res.state = current_state;
+        return res;
+    }
 
     switch (current_state.phase) {
         case Spawning:
