@@ -37,7 +37,11 @@ void update(unsigned long long tick_count, char player_input) {
             break;
     }
 
-    Output output = next_state(current_state, op, 0);
+    int attack_lines = 0;
+    if (current_state.phase == Spawning) {
+        attack_lines = 2;  // Example attack lines
+    }
+    Output output = next_state(current_state, op, attack_lines);
     current_state = output.state;
 
     render(current_state);

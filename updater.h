@@ -44,6 +44,7 @@ typedef struct {
     int free_fall_tick;
     int free_fall_interval;
     int score;
+    int attack_lines;
 } State;
 
 typedef struct {

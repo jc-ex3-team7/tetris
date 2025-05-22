@@ -79,8 +79,29 @@ Mino next_mino() {
 Output next_state(State current_state, Operation op, int attack_lines) {  // TODO: handle attack_lines
     Output res = {0};
     res.state = current_state;
+    current_state.attack_lines += attack_lines;
 
     if (current_state.phase == Spawning) {
+        // handle the opponent's attack
+        if (current_state.attack_lines > 0) {
+            for (int i = attack_lines; i < 20; i++) {
+                for (int j = 0; j < 10; j++) {
+                    current_state.field[i - attack_lines][j] = current_state.field[i][j];
+                }
+            }
+            int empty = rand() % 10;
+            for (int i = 20 - attack_lines; i < 20; i++) {
+                for (int j = 0; j < 10; j++) {
+                    if (j == empty) {
+                        current_state.field[i][j] = false;
+                    } else {
+                        current_state.field[i][j] = true;
+                    }
+                }
+            }
+            current_state.attack_lines = 0;
+        }
+
         current_state.mino = next_mino();
         current_state.phase = Playing;
 
