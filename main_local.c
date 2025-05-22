@@ -38,7 +38,7 @@ void update(unsigned long long tick_count, char player_input) {
     }
 
     int attack_lines = 0;
-    if (current_state.phase == Spawning) {
+    if (rand() % 100 < 5) {
         attack_lines = 2;  // Example attack lines
     }
     Output output = next_state(current_state, op, attack_lines);
@@ -50,7 +50,7 @@ void update(unsigned long long tick_count, char player_input) {
 
 void init() {
     current_state.free_fall_tick = 0;
-    current_state.free_fall_interval = 15;
+    current_state.free_fall_interval = 20;
     current_state.phase = Spawning;
     current_state.score = 0;
 
@@ -71,7 +71,7 @@ void timer_handler() {
 
 void* worker_thread(void* arg) {
     while (1) {
-        usleep(50 * 1000);  // sleep 100ms
+        usleep(50 * 1000);  // sleep 50ms
         timer_handler();
     }
     return NULL;
