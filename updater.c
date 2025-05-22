@@ -76,47 +76,56 @@ Mino next_mino() {
     return res;
 }
 
+static void handle_spawning_phase(State *state, int attack_lines) {
+    // handle the opponent's attack
+    if (state->attack_lines > 0) {
+        for (int i = attack_lines; i < 20; i++) {
+            for (int j = 0; j < 10; j++) {
+                state->field[i - attack_lines][j] = state->field[i][j];
+            }
+        }
+        int empty = rand() % 10;
+        for (int i = 20 - attack_lines; i < 20; i++) {
+            for (int j = 0; j < 10; j++) {
+                if (j == empty) {
+                    state->field[i][j] = false;
+                } else {
+                    state->field[i][j] = true;
+                }
+            }
+        }
+        state->attack_lines = 0;
+    }
+
+    state->mino = next_mino();
+    state->phase = Playing;
+}
+
+static void handle_lock_delay_phase(State *state) {
+    if (is_mino_position_valid(state->field, move_mino(state->mino, Down))) {
+        state->phase = Playing;
+        state->lock_delay_tick = 0;
+    } else {
+        state->lock_delay_tick++;
+        if (state->lock_delay_tick >= state->lock_delay_interval) {
+            lock_mino(state);
+        }
+    }
+}
+
 Output next_state(State current_state, Operation op, int attack_lines) {  // TODO: handle attack_lines
     Output res = {0};
     res.state = current_state;
     current_state.attack_lines += attack_lines;
 
-    if (current_state.phase == Spawning) {
-        // handle the opponent's attack
-        if (current_state.attack_lines > 0) {
-            for (int i = attack_lines; i < 20; i++) {
-                for (int j = 0; j < 10; j++) {
-                    current_state.field[i - attack_lines][j] = current_state.field[i][j];
-                }
-            }
-            int empty = rand() % 10;
-            for (int i = 20 - attack_lines; i < 20; i++) {
-                for (int j = 0; j < 10; j++) {
-                    if (j == empty) {
-                        current_state.field[i][j] = false;
-                    } else {
-                        current_state.field[i][j] = true;
-                    }
-                }
-            }
-            current_state.attack_lines = 0;
-        }
-
-        current_state.mino = next_mino();
-        current_state.phase = Playing;
-
-        res.state = current_state;
-        return res;
-    } else if (current_state.phase == LockDelay) {
-        if (is_mino_position_valid(current_state.field, move_mino(current_state.mino, Down))) {
-            current_state.phase = Playing;
-            current_state.lock_delay_tick = 0;
-        } else {
-            current_state.lock_delay_tick++;
-            if (current_state.lock_delay_tick >= current_state.lock_delay_interval) {
-                lock_mino(&current_state);
-            }
-        }
+    switch (current_state.phase) {
+        case Spawning:
+            handle_spawning_phase(&current_state, attack_lines);
+            res.state = current_state;
+            return res;
+        case LockDelay:
+            handle_lock_delay_phase(&current_state);
+            break;
     }
 
     // Handle user operation
@@ -151,7 +160,6 @@ Output next_state(State current_state, Operation op, int attack_lines) {  // TOD
     int cleared_lines = clear_lines(current_state.field);
     if (cleared_lines > 0) {
         res.linesToSend = cleared_lines;
-        // TODO: score points
         switch (cleared_lines) {
             case 1:
                 current_state.score += 100;
