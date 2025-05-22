@@ -24,6 +24,9 @@ void update(unsigned long long tick_count, char player_input) {
         case 'd':
             op = Right;
             break;
+        case 's':
+            op = Down;
+            break;
         case 'l':
             op = RotateLeft;
             break;
@@ -51,6 +54,7 @@ void update(unsigned long long tick_count, char player_input) {
 void init() {
     current_state.free_fall_tick = 0;
     current_state.free_fall_interval = 20;
+    current_state.lock_delay_interval = 20;
     current_state.phase = Spawning;
     current_state.score = 0;
 

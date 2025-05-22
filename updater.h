@@ -43,6 +43,8 @@ typedef struct {
 
     int free_fall_tick;
     int free_fall_interval;
+    int lock_delay_tick;
+    int lock_delay_interval;
     int score;
     int attack_lines;
 } State;

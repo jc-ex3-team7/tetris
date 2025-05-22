@@ -107,12 +107,25 @@ Output next_state(State current_state, Operation op, int attack_lines) {  // TOD
 
         res.state = current_state;
         return res;
+    } else if (current_state.phase == LockDelay) {
+        if (is_mino_position_valid(current_state.field, move_mino(current_state.mino, Down))) {
+            current_state.phase = Playing;
+            current_state.lock_delay_tick = 0;
+        } else {
+            current_state.lock_delay_tick++;
+            if (current_state.lock_delay_tick >= current_state.lock_delay_interval) {
+                lock_mino(&current_state);
+            }
+        }
     }
 
     // Handle user operation
     Mino moved = move_mino(current_state.mino, op);
     if (is_mino_position_valid(current_state.field, moved)) {
         current_state.mino = moved;
+    } else if (op == Down && current_state.phase == Playing) {
+        current_state.lock_delay_tick = 0;
+        current_state.phase = LockDelay;
     }
     if (op == Drop) {
         hard_drop(&current_state);
@@ -120,13 +133,15 @@ Output next_state(State current_state, Operation op, int attack_lines) {  // TOD
     }
 
     // Handle free fall
+    if (op == Down) {
+        current_state.free_fall_tick = 0;  // no free fall
+    }
     if (current_state.free_fall_tick >= current_state.free_fall_interval) {
         Mino moved_down = move_mino(current_state.mino, Down);
         if (is_mino_position_valid(current_state.field, moved_down)) {
             current_state.mino = moved_down;
             current_state.free_fall_tick = 0;
         } else {
-            // TODO: logic to lock the mino in place
             lock_mino(&current_state);
         }
     } else {
