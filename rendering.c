@@ -180,8 +180,6 @@ static void show_cursor(void) { buffered_print("\x1b[?25h", 6, false); }
 
 // 描画関数
 void render(State state) {
-    // 入力バッファをクリア（fflush で代替）
-    fflush(stdin);
     // カーソル非表示
     hide_cursor();
 
