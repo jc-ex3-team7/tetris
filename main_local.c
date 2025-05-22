@@ -45,6 +45,7 @@ void update(unsigned long long tick_count, char player_input) {
     current_state = output.state;
 
     render(current_state);
+    fflush(stdout);
 }
 
 void init() {
