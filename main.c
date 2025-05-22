@@ -64,9 +64,6 @@ void timer_handler() {
 }
 
 int main() {
-#if defined(NATIVE_MODE)
-    printf("do nothing...\n");
-#else
     init();
     set_mtimer_interval(TICK_INTERVAL /*msec*/);
     timer_interrupt_hook = timer_handler;
@@ -77,7 +74,6 @@ int main() {
             last_player_input = c;
         }
     }
-#endif
     return 0;
 }
 
