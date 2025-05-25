@@ -47,6 +47,11 @@ void update(unsigned long long tick_count, char player_input) {
     int attack_lines = 0;
     if (packet.type == ATTACK_LINES) {
         attack_lines = packet.data.lines;
+    } else if (packet.type == GAME_OVER) {
+        printf("\x1b[0m");
+        printf("You Won!\n");
+        current_state.phase = PHASE_GAME_OVER;
+        return;
     }
 
     Output out = next_state(current_state, op, attack_lines);
@@ -58,9 +63,11 @@ void update(unsigned long long tick_count, char player_input) {
 
     render(current_state);
 
-    if (current_state.phase == GameOver) {
+    if (current_state.phase == PHASE_GAME_OVER) {
         printf("\x1b[0m");
         printf("Game Over!\n");
+        printf("You Lost!\n");
+        sendGameOver();
         return;
     }
 }
@@ -69,7 +76,7 @@ void init() {
     current_state.free_fall_tick = 0;
     current_state.free_fall_interval = 20;
     current_state.lock_delay_interval = 20;
-    current_state.phase = Spawning;
+    current_state.phase = PHASE_SPAWNING;
     current_state.score = 0;
 
     for (int i = 0; i < 20; i++) {
@@ -80,7 +87,7 @@ void init() {
 }
 
 void timer_handler() {
-    if (current_state.phase == GameOver) {
+    if (current_state.phase == PHASE_GAME_OVER) {
         return;
     }
     update(TICK_COUNT, last_player_input);

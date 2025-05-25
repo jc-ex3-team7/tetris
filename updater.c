@@ -101,15 +101,15 @@ static void handle_spawning_phase(State *state) {
 
     state->mino = next_mino();
     if (!can_spawn_mino(state, state->mino)) {
-        state->phase = GameOver;
+        state->phase = PHASE_GAME_OVER;
         return;
     }
-    state->phase = Playing;
+    state->phase = PHASE_PLAYING;
 }
 
 static void handle_lock_delay_phase(State *state) {
     if (is_mino_position_valid(state->field, move_mino(state->mino, Down))) {
-        state->phase = Playing;
+        state->phase = PHASE_PLAYING;
         state->lock_delay_tick = 0;
     } else {
         state->lock_delay_tick++;
@@ -124,17 +124,17 @@ Output next_state(State current_state, Operation op, int attack_lines) {  // TOD
     res.state = current_state;
     current_state.attack_lines += attack_lines;
 
-    if (current_state.phase == GameOver) {
+    if (current_state.phase == PHASE_GAME_OVER) {
         res.state = current_state;
         return res;
     }
 
     switch (current_state.phase) {
-        case Spawning:
+        case PHASE_SPAWNING:
             handle_spawning_phase(&current_state);
             res.state = current_state;
             return res;
-        case LockDelay:
+        case PHASE_LOCK_DELAY:
             handle_lock_delay_phase(&current_state);
             break;
     }
@@ -143,9 +143,9 @@ Output next_state(State current_state, Operation op, int attack_lines) {  // TOD
     Mino moved = move_mino(current_state.mino, op);
     if (is_mino_position_valid(current_state.field, moved)) {
         current_state.mino = moved;
-    } else if (op == Down && current_state.phase == Playing) {
+    } else if (op == Down && current_state.phase == PHASE_PLAYING) {
         current_state.lock_delay_tick = 0;
-        current_state.phase = LockDelay;
+        current_state.phase = PHASE_LOCK_DELAY;
     }
     if (op == Drop) {
         hard_drop(&current_state);
@@ -325,5 +325,5 @@ void lock_mino(State *state) {
             }
         }
     }
-    state->phase = Spawning;
+    state->phase = PHASE_SPAWNING;
 }

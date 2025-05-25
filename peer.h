@@ -4,6 +4,7 @@
 typedef enum {
     NONE,
     ATTACK_LINES,
+    GAME_OVER,
 } DATA_TYPE;
 
 typedef struct {
