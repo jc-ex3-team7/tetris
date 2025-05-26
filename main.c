@@ -110,8 +110,8 @@ void display_score_7seg(int score) {
 #if defined(NATIVE_MODE)
     printf("do nothing...\n");
 #else
-    char temp_buf[20];
-    char seg_buf[8];
+    char temp_buf[20] = {0};
+    char seg_buf[8] = {0};
     itoa(score, seg_buf, 10);
     gpio_input(temp_buf, seg_buf);
     set_gpio_string(
