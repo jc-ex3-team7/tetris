@@ -140,7 +140,12 @@ Output next_state(State current_state, Operation op, int attack_lines) {  // TOD
     }
 
     // Handle user operation
-    Mino moved = move_mino(current_state.mino, op);
+    Mino moved;
+    if (op == RotateLeft || op == RotateRight) {
+        moved = super_rotate_system(op, current_state.mino, current_state.field);
+    } else {
+        moved = move_mino(current_state.mino, op);
+    }
     if (is_mino_position_valid(current_state.field, moved)) {
         current_state.mino = moved;
     } else if (op == Down && current_state.phase == PHASE_PLAYING) {
@@ -199,6 +204,76 @@ Output next_state(State current_state, Operation op, int attack_lines) {  // TOD
     return res;
 }
 
+Mino super_rotate_system(Operation op, Mino mino, bool field[20][10]) {
+    if (mino.type == I) {
+        return move_mino(mino, op);
+    }
+
+    Mino moved = move_mino(mino, op);
+    // 0
+    if (is_mino_position_valid(field, mino)) {
+        return moved;
+    }
+    switch (moved.rotate) {
+        case ROTATE_90:
+            moved.position.x -= 1;
+            break;
+        case ROTATE_270:
+            moved.position.x += 1;
+            break;
+        default:
+            if (op == RotateLeft) {
+                moved.position.x += 1;
+            } else {
+                moved.position.x -= 1;
+            }
+            break;
+    }
+
+    // 1
+    if (is_mino_position_valid(field, mino)) {
+        return moved;
+    }
+    if (moved.rotate == ROTATE_90 || moved.rotate == ROTATE_270) {
+        moved.position.y -= 1;
+    } else {
+        moved.position.y += 1;
+    }
+
+    // 2
+    if (is_mino_position_valid(field, mino)) {
+        return moved;
+    }
+    moved = move_mino(mino, op);
+    if (moved.rotate == ROTATE_90 || moved.rotate == ROTATE_270) {
+        moved.position.y += 1;
+    } else {
+        moved.position.y -= 1;
+    }
+
+    // 3
+    if (is_mino_position_valid(field, mino)) {
+        return moved;
+    }
+    switch (moved.rotate) {
+        case ROTATE_90:
+            moved.position.x -= 1;
+            break;
+        case ROTATE_270:
+            moved.position.x += 1;
+            break;
+        default:
+            if (op == RotateLeft) {
+                moved.position.x += 1;
+            } else {
+                moved.position.x -= 1;
+            }
+            break;
+    }
+
+    return moved;
+}
+
 bool is_mino_position_valid(bool field[20][10], Mino mino) {
     // Check if the mino is within the bounds of the field
     for (int i = 0; i < 4; i++) {
@@ -234,6 +309,7 @@ Mino move_mino(Mino current, Operation op) {
             res.position.x--;
             break;
         case RotateLeft:
+            res.rotate = (current.rotate - 1) % 4;
             switch (res.type) {
                 case T:
                 case S:
@@ -257,6 +333,7 @@ Mino move_mino(Mino current, Operation op) {
             }
             break;
         case RotateRight:
+            res.rotate = (current.rotate + 1) % 4;
             switch (res.type) {
                 case T:
                 case S:

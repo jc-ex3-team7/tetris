@@ -17,9 +17,17 @@ typedef struct {
     int y;
 } Position;
 
+typedef enum {
+    ROTATE_0 = 0,
+    ROTATE_90 = 1,
+    ROTATE_180 = 2,
+    ROTATE_270 = 3,
+} RotateStatus;
+
 typedef struct {
     TetrisType type;
     Position position;
+    RotateStatus rotate;
     bool block[4][4];
 } Mino;
 
@@ -60,6 +68,8 @@ typedef struct {
 } Output;
 
 Mino next_mino();
+
+Mino super_rotate_system(Operation op, Mino mino, bool field[20][10]);
 
 Mino move_mino(Mino current, Operation op);
 
