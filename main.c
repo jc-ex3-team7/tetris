@@ -86,6 +86,39 @@ void init() {
     }
 }
 
+int my_strlen(const char *str) {
+    int length = 0;
+    while (str[length] != '\0') {
+        length++;
+    }
+    return length;
+}
+
+void gpio_input(char *string, char *buf) {
+    int len = my_strlen(string);
+    int n = 0;
+    for (int i = 0; i < len; i++) {
+        buf[i] = string[i];
+        n++;
+    }
+    for (int i = n; i < len; i++) {
+        buf[i] = '0';
+    }
+}
+void display_score_7seg(int score) {
+#if defined(NATIVE_MODE)
+    printf("do nothing...\n");
+#else
+    char temp_buf[20];
+    char seg_buf[8];
+    itoa(score, seg_buf, 10);
+    gpio_input(temp_buf, seg_buf);
+    set_gpio_string(
+        GPIO_STR8(seg_buf[7], seg_buf[6], seg_buf[5], seg_buf[4], seg_buf[3], seg_buf[2], seg_buf[1], seg_buf[0]));
+
+#endif
+}
+
 void display_score_on_7seg(int score) {
     char string[20];
     char buf[8];
@@ -102,14 +135,6 @@ void timer_handler() {
     last_player_input = 0;
     TICK_COUNT++;
     display_score_7seg(current_state.score);
-}
-
-int my_strlen(const char *str) {
-    int length = 0;
-    while (str[length] != '\0') {
-        length++;
-    }
-    return length;
 }
 
 char *itoa(int value, char *buffer, int base) {
@@ -137,31 +162,6 @@ char *itoa(int value, char *buffer, int base) {
     }
 
     buffer[i] = '\0';
-}
-
-void gpio_input(char *string, char *buf) {
-    int len = my_strlen(string);
-    int n = 0;
-    for (int i = 0; i < len; i++) {
-        buf[i] = string[i];
-        n++;
-    }
-    for (int i = n; i < len; i++) {
-        buf[i] = '0';
-    }
-}
-void display_score_7seg(int score) {
-#if defined(NATIVE_MODE)
-    printf("do nothing...\n");
-#else
-    char temp_buf[20];
-    char seg_buf[8];
-    itoa(score, seg_buf, 10);
-    gpio_input(temp_buf, seg_buf);
-    set_gpio_string(
-        GPIO_STR8(seg_buf[7], seg_buf[6], seg_buf[5], seg_buf[4], seg_buf[3], seg_buf[2], seg_buf[1], seg_buf[0]));
-
-#endif
 }
 
 int main() {
