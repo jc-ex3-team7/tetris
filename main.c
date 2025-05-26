@@ -21,6 +21,7 @@ State current_state = {0};
 bool is_game_started = false;
 bool is_ready_sent = false;
 bool is_ready_received = false;
+bool is_seed_sent = false;
 bool is_seed_received = false;
 int my_seed = 0;
 int enemy_seed = 0;
@@ -71,9 +72,10 @@ void update(unsigned long long tick_count, char player_input) {
             is_ready_sent = true;
             my_seed = tick_count & 0xFF;
             send_ready();
-        } else if (is_ready_received && is_ready_sent && !is_seed_received) {
+        } else if (is_ready_received && is_ready_sent && !is_seed_sent) {
+            is_seed_sent = true;
             send_seed(my_seed);
-        } else if (is_ready_received && is_ready_sent && is_seed_received) {
+        } else if (is_ready_received && is_ready_sent && is_seed_received && is_seed_sent) {
             enemy_seed = packet.data.seed;
             int seed = 0x0F0F0F0F ^ (my_seed + enemy_seed);
             srand(seed);
