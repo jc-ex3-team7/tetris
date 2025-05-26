@@ -4,6 +4,7 @@
 typedef enum {
     NONE,
     ATTACK_LINES,
+    GAME_OVER,
 } DATA_TYPE;
 
 typedef struct {
@@ -16,5 +17,7 @@ typedef struct {
 DataPacket receive_data();
 
 void send_lines(int lines);
+
+void send_game_over();
 
 #endif

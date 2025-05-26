@@ -25,7 +25,7 @@ TetrisType next_mino_type() {
 Mino next_mino() {
     Mino res = {0};
     res.type = next_mino_type();
-    res.position.x = 4;
+    res.position.x = 3;
     res.position.y = 0;
 
     switch (res.type) {
@@ -76,6 +76,8 @@ Mino next_mino() {
     return res;
 }
 
+static bool can_spawn_mino(State *state, Mino mino) { return is_mino_position_valid(state->field, mino); }
+
 static void handle_spawning_phase(State *state) {
     // handle the opponent's attack
     if (state->attack_lines > 0) {
@@ -98,12 +100,16 @@ static void handle_spawning_phase(State *state) {
     }
 
     state->mino = next_mino();
-    state->phase = Playing;
+    if (!can_spawn_mino(state, state->mino)) {
+        state->phase = PHASE_GAME_OVER;
+        return;
+    }
+    state->phase = PHASE_PLAYING;
 }
 
 static void handle_lock_delay_phase(State *state) {
     if (is_mino_position_valid(state->field, move_mino(state->mino, Down))) {
-        state->phase = Playing;
+        state->phase = PHASE_PLAYING;
         state->lock_delay_tick = 0;
     } else {
         state->lock_delay_tick++;
@@ -118,12 +124,17 @@ Output next_state(State current_state, Operation op, int attack_lines) {  // TOD
     res.state = current_state;
     current_state.attack_lines += attack_lines;
 
+    if (current_state.phase == PHASE_GAME_OVER) {
+        res.state = current_state;
+        return res;
+    }
+
     switch (current_state.phase) {
-        case Spawning:
+        case PHASE_SPAWNING:
             handle_spawning_phase(&current_state);
             res.state = current_state;
             return res;
-        case LockDelay:
+        case PHASE_LOCK_DELAY:
             handle_lock_delay_phase(&current_state);
             break;
     }
@@ -132,9 +143,9 @@ Output next_state(State current_state, Operation op, int attack_lines) {  // TOD
     Mino moved = move_mino(current_state.mino, op);
     if (is_mino_position_valid(current_state.field, moved)) {
         current_state.mino = moved;
-    } else if (op == Down && current_state.phase == Playing) {
+    } else if (op == Down && current_state.phase == PHASE_PLAYING) {
         current_state.lock_delay_tick = 0;
-        current_state.phase = LockDelay;
+        current_state.phase = PHASE_LOCK_DELAY;
     }
     if (op == Drop) {
         hard_drop(&current_state);
@@ -314,5 +325,5 @@ void lock_mino(State *state) {
             }
         }
     }
-    state->phase = Spawning;
+    state->phase = PHASE_SPAWNING;
 }

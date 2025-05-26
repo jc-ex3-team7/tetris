@@ -14,6 +14,7 @@ void send_game_over() {}
 #include "peer.h"
 
 static const unsigned char TYPE_SEND_LINES = 0x01;
+static const unsigned char TYPE_GAME_OVER = 0x02;
 
 DataPacket receive_data() {
     DataPacket packet = {0};
@@ -25,9 +26,20 @@ DataPacket receive_data() {
 
     set_uart_ID(1);
     char type = io_getch();
+    switch (type) {
+        case TYPE_SEND_LINES:
+            packet.type = ATTACK_LINES;
+            packet.data.lines = io_getch();
+            break;
+        case TYPE_GAME_OVER:
+            packet.type = GAME_OVER;
+            break;
+        default:
+            packet.type = NONE;  // Unknown type
+            break;
+    }
     if (type == TYPE_SEND_LINES) {
         packet.type = ATTACK_LINES;
-        packet.data.lines = io_getch();
     }
     set_uart_ID(0);
 
@@ -41,6 +53,12 @@ void send_lines(int lines) {
     // lines must be less than 255
     io_putch((char)lines);
 
+    set_uart_ID(0);
+}
+
+void send_game_over() {
+    set_uart_ID(1);
+    io_putch(TYPE_GAME_OVER);
     set_uart_ID(0);
 }
 
