@@ -5,6 +5,7 @@ int main() {}
 #else
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "io.h"
 #include "peer.h"
@@ -17,6 +18,12 @@ unsigned long long TICK_COUNT = 0;
 char last_player_input = 0;
 
 State current_state = {0};
+bool is_game_started = false;
+bool is_ready_sent = false;
+bool is_ready_received = false;
+bool is_seed_received = false;
+int my_seed = 0;
+int enemy_seed = 0;
 
 void update(unsigned long long tick_count, char player_input) {
     Operation op = None;
@@ -52,6 +59,31 @@ void update(unsigned long long tick_count, char player_input) {
         printf("You Won!\n");
         current_state.phase = PHASE_GAME_OVER;
         return;
+    } else if (packet.type == READY) {
+        is_ready_received = true;
+    } else if (packet.type == SEED) {
+        is_seed_received = true;
+        printf("\x1b[0m");
+        printf("Seed received: %d\n", packet.data.seed);
+    }
+
+    if (!is_game_started) {
+        if (player_input > 0 && !is_ready_sent) {
+            is_ready_sent = true;
+            send_ready();
+            current_state.phase = PHASE_SPAWNING;
+        }
+        if (is_ready_received) {
+            my_seed = tick_count & 0xFF;
+            send_seed(my_seed);
+        }
+        if (is_seed_received) {
+            enemy_seed = packet.data.seed;
+            int seed = 0x0F0F0F0F ^ (my_seed + enemy_seed);
+            srand(seed);
+            is_game_started = true;
+        }
+        return;
     }
 
     Output out = next_state(current_state, op, attack_lines);
@@ -84,6 +116,11 @@ void init() {
             current_state.field[i][j] = false;
         }
     }
+
+    printf("\x1b[2J");    // Clear the screen
+    printf("\x1b[H");     // Move cursor to home position
+    printf("\x1b[?25l");  // Hide cursor
+    printf("Press any key to ready for the game...\n");
 }
 
 void timer_handler() {
