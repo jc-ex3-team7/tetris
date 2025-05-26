@@ -209,8 +209,10 @@ Mino super_rotate_system(Operation op, Mino mino, bool field[20][10]) {
         return move_mino(mino, op);
     }
 
-    Mino moved = move_mino(mino, op);
     // 0
+    Mino moved = move_mino(mino, op);
+
+    // 1
     if (is_mino_position_valid(field, mino)) {
         return moved;
     }
@@ -230,7 +232,7 @@ Mino super_rotate_system(Operation op, Mino mino, bool field[20][10]) {
             break;
     }
 
-    // 1
+    // 2
     if (is_mino_position_valid(field, mino)) {
         return moved;
     }
@@ -240,18 +242,18 @@ Mino super_rotate_system(Operation op, Mino mino, bool field[20][10]) {
         moved.position.y += 1;
     }
 
-    // 2
+    // 3
     if (is_mino_position_valid(field, mino)) {
         return moved;
     }
     moved = move_mino(mino, op);
     if (moved.rotate == ROTATE_90 || moved.rotate == ROTATE_270) {
-        moved.position.y += 1;
+        moved.position.y += 2;
     } else {
-        moved.position.y -= 1;
+        moved.position.y -= 2;
     }
 
-    // 3
+    // 4
     if (is_mino_position_valid(field, mino)) {
         return moved;
     }
