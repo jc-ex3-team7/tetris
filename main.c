@@ -63,8 +63,6 @@ void update(unsigned long long tick_count, char player_input) {
         is_ready_received = true;
     } else if (packet.type == SEED) {
         is_seed_received = true;
-        printf("\x1b[0m");
-        printf("Seed received: %d\n", packet.data.seed);
     }
 
     if (!is_game_started) {
