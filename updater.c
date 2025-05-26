@@ -76,16 +76,16 @@ Mino next_mino() {
     return res;
 }
 
-static void handle_spawning_phase(State *state, int attack_lines) {
+static void handle_spawning_phase(State *state) {
     // handle the opponent's attack
     if (state->attack_lines > 0) {
-        for (int i = attack_lines; i < 20; i++) {
+        for (int i = state->attack_lines; i < 20; i++) {
             for (int j = 0; j < 10; j++) {
-                state->field[i - attack_lines][j] = state->field[i][j];
+                state->field[i - state->attack_lines][j] = state->field[i][j];
             }
         }
         int empty = rand() % 10;
-        for (int i = 20 - attack_lines; i < 20; i++) {
+        for (int i = 20 - state->attack_lines; i < 20; i++) {
             for (int j = 0; j < 10; j++) {
                 if (j == empty) {
                     state->field[i][j] = false;
@@ -120,7 +120,7 @@ Output next_state(State current_state, Operation op, int attack_lines) {  // TOD
 
     switch (current_state.phase) {
         case Spawning:
-            handle_spawning_phase(&current_state, attack_lines);
+            handle_spawning_phase(&current_state);
             res.state = current_state;
             return res;
         case LockDelay:
