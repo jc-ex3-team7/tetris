@@ -170,6 +170,11 @@ Output next_state(State current_state, Operation op, int attack_lines) {  // TOD
 
     int cleared_lines = clear_lines(current_state.field);
     if (cleared_lines > 0) {
+        if (current_state.attack_lines > 0) {
+            int min_lines = cleared_lines < current_state.attack_lines ? cleared_lines : current_state.attack_lines;
+            current_state.attack_lines -= min_lines;
+            cleared_lines -= min_lines;
+        }
         res.linesToSend = cleared_lines;
         switch (cleared_lines) {
             case 1:
