@@ -63,6 +63,7 @@ void update(unsigned long long tick_count, char player_input) {
         is_ready_received = true;
     } else if (packet.type == SEED) {
         is_seed_received = true;
+        enemy_seed = packet.data.seed;
     }
 
     if (!is_game_started) {
@@ -70,7 +71,7 @@ void update(unsigned long long tick_count, char player_input) {
             is_ready_sent = true;
             send_ready();
             current_state.phase = PHASE_SPAWNING;
-        } else if (is_ready_received) {
+        } else if (is_ready_received && !is_seed_received) {
             my_seed = tick_count & 0xFF;
             send_seed(my_seed);
         } else if (is_seed_received) {
