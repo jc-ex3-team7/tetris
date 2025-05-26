@@ -70,12 +70,10 @@ void update(unsigned long long tick_count, char player_input) {
             is_ready_sent = true;
             send_ready();
             current_state.phase = PHASE_SPAWNING;
-        }
-        if (is_ready_received) {
+        } else if (is_ready_received) {
             my_seed = tick_count & 0xFF;
             send_seed(my_seed);
-        }
-        if (is_seed_received) {
+        } else if (is_seed_received) {
             enemy_seed = packet.data.seed;
             int seed = 0x0F0F0F0F ^ (my_seed + enemy_seed);
             srand(seed);
