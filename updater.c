@@ -76,34 +76,81 @@ Mino next_mino() {
     return res;
 }
 
-State next_state(State current_state, Operation op) {
-    if (current_state.phase == Spawning) {
-        current_state.mino = next_mino();
-        current_state.phase = Playing;
+static void handle_spawning_phase(State *state) {
+    // handle the opponent's attack
+    if (state->attack_lines > 0) {
+        for (int i = state->attack_lines; i < 20; i++) {
+            for (int j = 0; j < 10; j++) {
+                state->field[i - state->attack_lines][j] = state->field[i][j];
+            }
+        }
+        int empty = rand() % 10;
+        for (int i = 20 - state->attack_lines; i < 20; i++) {
+            for (int j = 0; j < 10; j++) {
+                if (j == empty) {
+                    state->field[i][j] = false;
+                } else {
+                    state->field[i][j] = true;
+                }
+            }
+        }
+        state->attack_lines = 0;
+    }
 
-        return current_state;
+    state->mino = next_mino();
+    state->phase = Playing;
+}
+
+static void handle_lock_delay_phase(State *state) {
+    if (is_mino_position_valid(state->field, move_mino(state->mino, Down))) {
+        state->phase = Playing;
+        state->lock_delay_tick = 0;
+    } else {
+        state->lock_delay_tick++;
+        if (state->lock_delay_tick >= state->lock_delay_interval) {
+            lock_mino(state);
+        }
+    }
+}
+
+Output next_state(State current_state, Operation op, int attack_lines) {  // TODO: handle attack_lines
+    Output res = {0};
+    res.state = current_state;
+    current_state.attack_lines += attack_lines;
+
+    switch (current_state.phase) {
+        case Spawning:
+            handle_spawning_phase(&current_state);
+            res.state = current_state;
+            return res;
+        case LockDelay:
+            handle_lock_delay_phase(&current_state);
+            break;
     }
 
     // Handle user operation
     Mino moved = move_mino(current_state.mino, op);
     if (is_mino_position_valid(current_state.field, moved)) {
         current_state.mino = moved;
+    } else if (op == Down && current_state.phase == Playing) {
+        current_state.lock_delay_tick = 0;
+        current_state.phase = LockDelay;
     }
     if (op == Drop) {
-        // TODO: logic to handle hard drop
         hard_drop(&current_state);
-        // TODO: lock the mino in place
         lock_mino(&current_state);
     }
 
     // Handle free fall
+    if (op == Down) {
+        current_state.free_fall_tick = 0;  // no free fall
+    }
     if (current_state.free_fall_tick >= current_state.free_fall_interval) {
         Mino moved_down = move_mino(current_state.mino, Down);
         if (is_mino_position_valid(current_state.field, moved_down)) {
             current_state.mino = moved_down;
             current_state.free_fall_tick = 0;
         } else {
-            // TODO: logic to lock the mino in place
             lock_mino(&current_state);
         }
     } else {
@@ -112,7 +159,7 @@ State next_state(State current_state, Operation op) {
 
     int cleared_lines = clear_lines(current_state.field);
     if (cleared_lines > 0) {
-        // TODO: score points
+        res.linesToSend = cleared_lines;
         switch (cleared_lines) {
             case 1:
                 current_state.score += 100;
@@ -132,7 +179,8 @@ State next_state(State current_state, Operation op) {
         }
     }
 
-    return current_state;
+    res.state = current_state;
+    return res;
 }
 
 bool is_mino_position_valid(bool field[20][10], Mino mino) {

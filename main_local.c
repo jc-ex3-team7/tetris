@@ -24,6 +24,9 @@ void update(unsigned long long tick_count, char player_input) {
         case 'd':
             op = Right;
             break;
+        case 's':
+            op = Down;
+            break;
         case 'l':
             op = RotateLeft;
             break;
@@ -37,14 +40,21 @@ void update(unsigned long long tick_count, char player_input) {
             break;
     }
 
-    current_state = next_state(current_state, op);
+    int attack_lines = 0;
+    if (rand() % 100 < 5) {
+        attack_lines = 2;  // Example attack lines
+    }
+    Output output = next_state(current_state, op, attack_lines);
+    current_state = output.state;
 
     render(current_state);
+    fflush(stdout);
 }
 
 void init() {
     current_state.free_fall_tick = 0;
-    current_state.free_fall_interval = 15;
+    current_state.free_fall_interval = 20;
+    current_state.lock_delay_interval = 20;
     current_state.phase = Spawning;
     current_state.score = 0;
 
@@ -65,7 +75,7 @@ void timer_handler() {
 
 void* worker_thread(void* arg) {
     while (1) {
-        usleep(50 * 1000);  // sleep 100ms
+        usleep(50 * 1000);  // sleep 50ms
         timer_handler();
     }
     return NULL;

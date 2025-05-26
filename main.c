@@ -7,6 +7,7 @@ int main() {}
 #include <stdio.h>
 
 #include "io.h"
+#include "peer.h"
 #include "rendering.h"
 #include "updater.h"
 
@@ -15,7 +16,7 @@ int main() {}
 unsigned long long TICK_COUNT = 0;
 char last_player_input = 0;
 
-State current_state;
+State current_state = {0};
 
 void update(unsigned long long tick_count, char player_input) {
     Operation op = None;
@@ -25,6 +26,9 @@ void update(unsigned long long tick_count, char player_input) {
             break;
         case 'd':
             op = Right;
+            break;
+        case 's':
+            op = Down;
             break;
         case 'l':
             op = RotateLeft;
@@ -39,7 +43,18 @@ void update(unsigned long long tick_count, char player_input) {
             break;
     }
 
-    current_state = next_state(current_state, op);
+    DataPacket packet = receive_data();
+    int attack_lines = 0;
+    if (packet.type == ATTACK_LINES) {
+        attack_lines = packet.data.lines;
+    }
+
+    Output out = next_state(current_state, op, attack_lines);
+    current_state = out.state;
+
+    if (out.linesToSend > 0) {
+        send_lines(out.linesToSend);
+    }
 
     render(current_state);
 }
@@ -47,6 +62,7 @@ void update(unsigned long long tick_count, char player_input) {
 void init() {
     current_state.free_fall_tick = 0;
     current_state.free_fall_interval = 20;
+    current_state.lock_delay_interval = 20;
     current_state.phase = Spawning;
     current_state.score = 0;
 
