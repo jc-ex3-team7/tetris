@@ -56,7 +56,7 @@ void send_lines(int lines) {
     set_uart_ID(0);
 }
 
-void sendGameOver() {
+void send_game_over() {
     set_uart_ID(1);
     io_putch(TYPE_GAME_OVER);
     set_uart_ID(0);

@@ -18,4 +18,6 @@ DataPacket receive_data();
 
 void send_lines(int lines);
 
+void send_game_over();
+
 #endif

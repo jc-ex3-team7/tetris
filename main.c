@@ -67,7 +67,7 @@ void update(unsigned long long tick_count, char player_input) {
         printf("\x1b[0m");
         printf("Game Over!\n");
         printf("You Lost!\n");
-        sendGameOver();
+        send_game_over();
         return;
     }
 }
