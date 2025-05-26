@@ -120,14 +120,6 @@ void display_score_7seg(int score) {
 #endif
 }
 
-void display_score_on_7seg(int score) {
-    char string[20];
-    char buf[8];
-    itoa(score, buf, 10);
-    gpio_input(string, buf);
-    set_gpio_string(GPIO_STR8(buf[7], buf[6], buf[5], buf[4], buf[3], buf[2], buf[1], buf[0]));
-}
-
 void timer_handler() {
     if (current_state.phase == PHASE_GAME_OVER) {
         return;
@@ -136,33 +128,6 @@ void timer_handler() {
     last_player_input = 0;
     TICK_COUNT++;
     display_score_7seg(current_state.score);
-}
-
-char *itoa(int value, char *buffer, int base) {
-    if (base < 2 || base > 32) {
-        return buffer;
-    }
-    int n = abs(value);
-    int i = 0;
-    while (n) {
-        int r = n % base;
-
-        if (r >= 10) {
-            buffer[i++] = 65 + (r - 10);
-        } else {
-            buffer[i++] = 48 + r;
-        }
-        n = n / base;
-    }
-    if (i == 0) {
-        buffer[i++] = '0';
-    }
-
-    if (value < 0 && base == 10) {
-        buffer[i++] = '-';
-    }
-
-    buffer[i] = '\0';
 }
 
 int main() {
