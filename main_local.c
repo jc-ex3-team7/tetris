@@ -13,7 +13,7 @@
 unsigned long long TICK_COUNT = 0;
 char last_player_input = 0;
 
-State current_state;
+State current_state = {0};
 
 void update(unsigned long long tick_count, char player_input) {
     Operation op = None;
@@ -27,10 +27,10 @@ void update(unsigned long long tick_count, char player_input) {
         case 's':
             op = Down;
             break;
-        case 'l':
+        case 'j':
             op = RotateLeft;
             break;
-        case 'j':
+        case 'l':
             op = RotateRight;
             break;
         case ' ':
@@ -41,9 +41,9 @@ void update(unsigned long long tick_count, char player_input) {
     }
 
     int attack_lines = 0;
-    if (rand() % 100 < 5) {
-        attack_lines = 2;  // Example attack lines
-    }
+    // if (rand() % 100 < 5) {
+    //     attack_lines = 2;  // Example attack lines
+    // }
     Output output = next_state(current_state, op, attack_lines);
     current_state = output.state;
 
