@@ -201,7 +201,7 @@ void render(State state) {
         }
     }
     for (int i = 0; i < 22; i++) {
-        COLOR_FIELD[21 - i][12] = state.attack_lines ? RED : BLACK;
+        COLOR_FIELD[21 - i][12] = i < state.attack_lines ? RED : BLACK;
     }
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
