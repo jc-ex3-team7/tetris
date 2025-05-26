@@ -15,6 +15,6 @@ typedef struct {
 
 DataPacket receive_data();
 
-void sendLiens(int lines);
+void send_lines(int lines);
 
 #endif

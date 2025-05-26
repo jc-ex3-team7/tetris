@@ -1,14 +1,25 @@
+#if defined(NATIVE_MODE)
+
 #include "peer.h"
 
+DataPacket receive_data() { return; }
+
+void send_lines(int lines) {}
+
+void send_game_over() {}
+
+#else
+
 #include "io.h"
+#include "peer.h"
 
 static const unsigned char TYPE_SEND_LINES = 0x01;
 
 DataPacket receive_data() {
     DataPacket packet = {0};
 
-    UARTBuf* ub_rx = &UART_BUF_RX[1];
-    if (!ub_rx->not_empty) {
+    UART *uart = _uart[1];
+    if (UART_RX_EMPTY(uart)) {
         return packet;  /// no data
     }
 
@@ -23,7 +34,7 @@ DataPacket receive_data() {
     return packet;
 }
 
-void sendLiens(int lines) {
+void send_lines(int lines) {
     set_uart_ID(1);
 
     io_putch(TYPE_SEND_LINES);
@@ -32,3 +43,5 @@ void sendLiens(int lines) {
 
     set_uart_ID(0);
 }
+
+#endif

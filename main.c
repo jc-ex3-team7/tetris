@@ -53,7 +53,7 @@ void update(unsigned long long tick_count, char player_input) {
     current_state = out.state;
 
     if (out.linesToSend > 0) {
-        sendLines(out.linesToSend);
+        send_lines(out.linesToSend);
     }
 
     render(current_state);
