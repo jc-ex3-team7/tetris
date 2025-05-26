@@ -70,7 +70,6 @@ void update(unsigned long long tick_count, char player_input) {
         if (player_input > 0 && !is_ready_sent) {
             is_ready_sent = true;
             send_ready();
-            current_state.phase = PHASE_SPAWNING;
         } else if (is_ready_received && !is_seed_received) {
             my_seed = tick_count & 0xFF;
             send_seed(my_seed);
