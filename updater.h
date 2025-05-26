@@ -21,6 +21,7 @@ typedef struct {
     TetrisType type;
     Position position;
     bool block[4][4];
+    unsigned char rotation;
 } Mino;
 
 typedef enum {
@@ -61,7 +62,7 @@ typedef struct {
 
 Mino next_mino();
 
-Mino move_mino(Mino current, Operation op);
+Mino move_mino(Mino current, Operation op, bool field[20][10]);
 
 bool is_mino_position_valid(bool field[20][10], Mino mino);
 

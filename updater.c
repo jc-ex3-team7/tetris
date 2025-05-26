@@ -27,6 +27,7 @@ Mino next_mino() {
     res.type = next_mino_type();
     res.position.x = 3;
     res.position.y = 0;
+    res.rotation = 0;
 
     switch (res.type) {
         case T:
@@ -119,7 +120,7 @@ static void handle_lock_delay_phase(State *state) {
     }
 }
 
-Output next_state(State current_state, Operation op, int attack_lines) {  // TODO: handle attack_lines
+Output next_state(State current_state, Operation op, int attack_lines) {
     Output res = {0};
     res.state = current_state;
     current_state.attack_lines += attack_lines;
@@ -140,7 +141,7 @@ Output next_state(State current_state, Operation op, int attack_lines) {  // TOD
     }
 
     // Handle user operation
-    Mino moved = move_mino(current_state.mino, op);
+    Mino moved = move_mino(current_state.mino, op, current_state.field);
     if (is_mino_position_valid(current_state.field, moved)) {
         current_state.mino = moved;
     } else if (op == Down && current_state.phase == PHASE_PLAYING) {
@@ -214,8 +215,52 @@ bool is_mino_position_valid(bool field[20][10], Mino mino) {
     }
     return true;
 }
+const int srs_offsets[4][2][5][2] = {
+    {{{0, 0}, {0, -1}, {-1, -1}, {2, 0}, {2, -1}}, {{0, 0}, {0, 1}, {-1, 1}, {2, 0}, {2, 1}}},
+    {{{0, 0}, {0, 1}, {1, 1}, {-2, 0}, {2, 1}}, {{0, 0}, {0, 1}, {1, 1}, {-2, 0}, {2, 1}}},
+    {{{0, 0}, {0, 1}, {-1, 1}, {2, 0}, {2, 1}}, {{0, 0}, {0, 1}, {1, 1}, {-2, 0}, {-2, 1}}},
+    {{{0, 0}, {0, -1}, {1, -1}, {-2, 0}, {-2, -1}}, {{0, 0}, {0, -1}, {1, -1}, {-2, 0}, {-2, -1}}}};
 
-Mino move_mino(Mino current, Operation op) {
+void rotate_mino(Mino *mino, bool clockwise, bool field[20][10]) {
+    Mino rotated = {0};
+    rotated.type = mino->type;
+    rotated.position = mino->position;
+
+    unsigned char rotation = mino->rotation;
+    unsigned char new_rotation = clockwise ? (rotation + 1) % 4 : (rotation + 3) % 4;
+
+    rotated.rotation = new_rotation;
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (clockwise) {
+                rotated.block[j][3 - i] = mino->block[i][j];
+            } else {
+                rotated.block[3 - j][i] = mino->block[i][j];
+            }
+        }
+    }
+
+    for (int i = 0; i < 5; i++) {
+        int offset_y = srs_offsets[rotation][clockwise][i][0];
+        int offset_x = srs_offsets[rotation][clockwise][i][1];
+
+        rotated.position.y += offset_y;
+        rotated.position.x += offset_x;
+
+        if (is_mino_position_valid(field, rotated)) {
+            *mino = rotated;
+            return;
+        }
+
+        rotated.position.y = mino->position.y;
+        rotated.position.x = mino->position.x;
+    }
+
+    *mino = rotated;
+}
+
+Mino move_mino(Mino current, Operation op, bool field[20][10]) {
     Mino res = {0};
 
     res.type = current.type;
@@ -240,10 +285,7 @@ Mino move_mino(Mino current, Operation op) {
                 case Z:
                 case L:
                 case J:
-                    for (int y = 0; y < 3; y++)
-                        for (int x = 0; x < 3; x++) {
-                            res.block[x + 1][2 - y] = current.block[y + 1][x];
-                        }
+                    rotate_mino(&res, false, field);
                     break;
                 case O:
                     break;
@@ -263,10 +305,7 @@ Mino move_mino(Mino current, Operation op) {
                 case Z:
                 case L:
                 case J:
-                    for (int y = 0; y < 3; y++)
-                        for (int x = 0; x < 3; x++) {
-                            res.block[3 - x][y] = current.block[y + 1][x];
-                        }
+                    rotate_mino(&res, true, field);
                     break;
                 case O:
                     break;
