@@ -105,6 +105,7 @@ void gpio_input(char *string, char *buf) {
         buf[i] = '0';
     }
 }
+
 void display_score_7seg(int score) {
 #if defined(NATIVE_MODE)
     printf("do nothing...\n");
