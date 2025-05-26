@@ -38,10 +38,10 @@ void update(unsigned long long tick_count, char player_input) {
         case 's':
             op = Down;
             break;
-        case 'l':
+        case 'j':
             op = RotateLeft;
             break;
-        case 'j':
+        case 'l':
             op = RotateRight;
             break;
         case ' ':

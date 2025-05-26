@@ -213,7 +213,7 @@ Mino super_rotate_system(Operation op, Mino mino, bool field[20][10]) {
     Mino moved = move_mino(mino, op);
 
     // 1
-    if (is_mino_position_valid(field, mino)) {
+    if (is_mino_position_valid(field, moved)) {
         return moved;
     }
     switch (moved.rotate) {
@@ -224,16 +224,16 @@ Mino super_rotate_system(Operation op, Mino mino, bool field[20][10]) {
             moved.position.x += 1;
             break;
         default:
-            if (op == RotateLeft) {
-                moved.position.x += 1;
-            } else {
+            if (mino.rotate == ROTATE_270) {
                 moved.position.x -= 1;
+            } else {
+                moved.position.x += 1;
             }
             break;
     }
 
     // 2
-    if (is_mino_position_valid(field, mino)) {
+    if (is_mino_position_valid(field, moved)) {
         return moved;
     }
     if (moved.rotate == ROTATE_90 || moved.rotate == ROTATE_270) {
@@ -243,7 +243,7 @@ Mino super_rotate_system(Operation op, Mino mino, bool field[20][10]) {
     }
 
     // 3
-    if (is_mino_position_valid(field, mino)) {
+    if (is_mino_position_valid(field, moved)) {
         return moved;
     }
     moved = move_mino(mino, op);
@@ -254,7 +254,7 @@ Mino super_rotate_system(Operation op, Mino mino, bool field[20][10]) {
     }
 
     // 4
-    if (is_mino_position_valid(field, mino)) {
+    if (is_mino_position_valid(field, moved)) {
         return moved;
     }
     switch (moved.rotate) {
@@ -265,10 +265,10 @@ Mino super_rotate_system(Operation op, Mino mino, bool field[20][10]) {
             moved.position.x += 1;
             break;
         default:
-            if (op == RotateLeft) {
-                moved.position.x += 1;
-            } else {
+            if (mino.rotate == ROTATE_270) {
                 moved.position.x -= 1;
+            } else {
+                moved.position.x += 1;
             }
             break;
     }
@@ -297,6 +297,7 @@ Mino move_mino(Mino current, Operation op) {
 
     res.type = current.type;
     res.position = current.position;
+    res.rotate = current.rotate;
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             res.block[i][j] = current.block[i][j];
@@ -311,31 +312,7 @@ Mino move_mino(Mino current, Operation op) {
             res.position.x--;
             break;
         case RotateLeft:
-            res.rotate = (current.rotate - 1) % 4;
-            switch (res.type) {
-                case T:
-                case S:
-                case Z:
-                case L:
-                case J:
-                    for (int y = 0; y < 3; y++)
-                        for (int x = 0; x < 3; x++) {
-                            res.block[x + 1][2 - y] = current.block[y + 1][x];
-                        }
-                    break;
-                case O:
-                    break;
-                case I:
-                    for (int y = 0; y < 4; y++) {
-                        for (int x = 0; x < 4; x++) {
-                            res.block[x][3 - y] = current.block[y][x];
-                        }
-                    }
-                    break;
-            }
-            break;
-        case RotateRight:
-            res.rotate = (current.rotate + 1) % 4;
+            res.rotate = (current.rotate + 3) % 4;
             switch (res.type) {
                 case T:
                 case S:
@@ -353,6 +330,30 @@ Mino move_mino(Mino current, Operation op) {
                     for (int y = 0; y < 4; y++) {
                         for (int x = 0; x < 4; x++) {
                             res.block[3 - x][y] = current.block[y][x];
+                        }
+                    }
+                    break;
+            }
+            break;
+        case RotateRight:
+            res.rotate = (current.rotate + 1) % 4;
+            switch (res.type) {
+                case T:
+                case S:
+                case Z:
+                case L:
+                case J:
+                    for (int y = 0; y < 3; y++)
+                        for (int x = 0; x < 3; x++) {
+                            res.block[x + 1][2 - y] = current.block[y + 1][x];
+                        }
+                    break;
+                case O:
+                    break;
+                case I:
+                    for (int y = 0; y < 4; y++) {
+                        for (int x = 0; x < 4; x++) {
+                            res.block[x][3 - y] = current.block[y][x];
                         }
                     }
                     break;
