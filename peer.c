@@ -47,9 +47,6 @@ DataPacket receive_data() {
             packet.type = NONE;  // Unknown type
             break;
     }
-    if (type == TYPE_SEND_LINES) {
-        packet.type = ATTACK_LINES;
-    }
     set_uart_ID(0);
 
     return packet;
