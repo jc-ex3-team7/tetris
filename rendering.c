@@ -120,8 +120,8 @@ int color_to_code(char *out, Color color) {
 #define BUFFER_SIZE 512
 static char RENDER_BUFFER[BUFFER_SIZE];
 static int RENDER_BUFFER_INDEX = 0;
-static Color COLOR_FIELD[22][12];
-static Color PREV_COLOR_FIELD[22][12];
+static Color COLOR_FIELD[22][13];
+static Color PREV_COLOR_FIELD[22][13];
 static bool first_render = true;
 
 // 簡易的整数→文字列変換
@@ -185,7 +185,7 @@ void render(State state) {
 
     // フィールドの準備
     for (int y = 0; y < 22; ++y) {
-        for (int x = 0; x < 12; ++x) {
+        for (int x = 0; x < 13; ++x) {
             if (y == 0 || y == 21 || x == 0 || x == 11) {
                 COLOR_FIELD[y][x] = WHITE;
             } else {
@@ -199,6 +199,9 @@ void render(State state) {
                 COLOR_FIELD[y + 1][x + 1] = GRAY;
             }
         }
+    }
+    for (int i = 0; i < 22; i++) {
+        COLOR_FIELD[21 - i][12] = state.attack_lines ? RED : BLACK;
     }
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
@@ -245,7 +248,7 @@ void render(State state) {
             Color prev = WHITE;
             len = color_to_code(color_buf, WHITE);
             buffered_print(color_buf, len, false);
-            for (x = 0; x < 12; ++x) {
+            for (x = 0; x < 13; ++x) {
                 if (COLOR_FIELD[y][x] != prev) {
                     len = color_to_code(color_buf, COLOR_FIELD[y][x]);
                     buffered_print(color_buf, len, false);
@@ -258,7 +261,7 @@ void render(State state) {
     } else {
         // 差分更新
         for (y = 0; y < 22; ++y) {
-            for (int x = 0; x < 12; ++x) {
+            for (int x = 0; x < 13; ++x) {
                 if (COLOR_FIELD[y][x] != PREV_COLOR_FIELD[y][x]) {
                     len = move_cursor_code(cs_buf, y + 1, x * 2 + 1);
                     buffered_print(cs_buf, len, false);
@@ -281,7 +284,7 @@ void render(State state) {
 
     // 前回バッファを更新
     for (y = 0; y < 22; ++y) {
-        for (x = 0; x < 12; ++x) {
+        for (x = 0; x < 13; ++x) {
             PREV_COLOR_FIELD[y][x] = COLOR_FIELD[y][x];
         }
     }
