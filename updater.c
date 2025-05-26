@@ -109,7 +109,7 @@ static void handle_spawning_phase(State *state) {
 }
 
 static void handle_lock_delay_phase(State *state) {
-    if (is_mino_position_valid(state->field, move_mino(state->mino, Down))) {
+    if (is_mino_position_valid(state->field, move_mino(state->mino, Down, state->field))) {
         state->phase = PHASE_PLAYING;
         state->lock_delay_tick = 0;
     } else {
@@ -158,7 +158,7 @@ Output next_state(State current_state, Operation op, int attack_lines) {
         current_state.free_fall_tick = 0;  // no free fall
     }
     if (current_state.free_fall_tick >= current_state.free_fall_interval) {
-        Mino moved_down = move_mino(current_state.mino, Down);
+        Mino moved_down = move_mino(current_state.mino, Down, current_state.field);
         if (is_mino_position_valid(current_state.field, moved_down)) {
             current_state.mino = moved_down;
             current_state.free_fall_tick = 0;
@@ -354,7 +354,7 @@ int clear_lines(bool field[20][10]) {
 }
 
 void hard_drop(State *state) {
-    while (is_mino_position_valid(state->field, move_mino(state->mino, Down))) {
+    while (is_mino_position_valid(state->field, move_mino(state->mino, Down, state->field))) {
         state->mino.position.y++;
     }
 }
