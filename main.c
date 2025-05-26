@@ -69,11 +69,11 @@ void update(unsigned long long tick_count, char player_input) {
     if (!is_game_started) {
         if (player_input > 0 && !is_ready_sent) {
             is_ready_sent = true;
-            send_ready();
-        } else if (is_ready_received && !is_seed_received) {
             my_seed = tick_count & 0xFF;
+            send_ready();
+        } else if (is_ready_received && is_ready_sent && !is_seed_received) {
             send_seed(my_seed);
-        } else if (is_seed_received) {
+        } else if (is_ready_received && is_ready_sent && is_seed_received) {
             enemy_seed = packet.data.seed;
             int seed = 0x0F0F0F0F ^ (my_seed + enemy_seed);
             srand(seed);
