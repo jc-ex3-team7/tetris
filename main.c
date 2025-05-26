@@ -87,6 +87,30 @@ void init() {
     }
 }
 
+char *my_itoa(int value, char *buffer, int base) {
+    if (base < 2 || base > 32) {
+        return buffer;
+    }
+    int n = abs(value);
+    int i = 0;
+    while (n) {
+        int r = n % base;
+        if (r >= 10) {
+            buffer[i++] = 65 + (r - 10);
+        } else {
+            buffer[i++] = 48 + r;
+        }
+        n = n / base;
+    }
+    if (i == 0) {
+        buffer[i++] = '0';
+    }
+    if (value < 0 && base == 10) {
+        buffer[i++] = '-';
+    }
+    buffer[i] = '\0';
+}
+
 int my_strlen(const char *str) {
     int length = 0;
     while (str[length] != '\0') {
@@ -113,7 +137,7 @@ void display_score_7seg(int score) {
 #else
     char temp_buf[20] = {0};
     char seg_buf[8] = {0};
-    itoa(score, seg_buf, 10);
+    my_itoa(score, seg_buf, 10);
     gpio_input(temp_buf, seg_buf);
     set_gpio_string(
         GPIO_STR8(seg_buf[7], seg_buf[6], seg_buf[5], seg_buf[4], seg_buf[3], seg_buf[2], seg_buf[1], seg_buf[0]));
