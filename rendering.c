@@ -196,7 +196,7 @@ void render(State state) {
     for (int y = 0; y < 20; ++y) {
         for (int x = 0; x < 10; ++x) {
             if (state.field[y][x]) {
-                COLOR_FIELD[y + 1][x + 1] = WHITE;
+                COLOR_FIELD[y + 1][x + 1] = GRAY;
             }
         }
     }
