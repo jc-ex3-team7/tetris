@@ -66,10 +66,10 @@ Mino next_mino() {
             res.block[2][2] = true;
             break;
         case I:
-            res.block[2][0] = true;
-            res.block[2][1] = true;
-            res.block[2][2] = true;
-            res.block[2][3] = true;
+            res.block[1][0] = true;
+            res.block[1][1] = true;
+            res.block[1][2] = true;
+            res.block[1][3] = true;
             break;
     }
 
@@ -206,74 +206,182 @@ Output next_state(State current_state, Operation op, int attack_lines) {  // TOD
 
 Mino super_rotate_system(Operation op, Mino mino, bool field[20][10]) {
     if (mino.type == I) {
-        return move_mino(mino, op);
-    }
+        // 0
+        Mino pt0 = move_mino(mino, op);
+        if (is_mino_position_valid(field, pt0)) {
+            return pt0;
+        }
 
-    // 0
-    Mino moved = move_mino(mino, op);
+        // 1
+        Mino pt1 = pt0;
+        switch (pt0.rotate) {
+            case ROTATE_90:
+                pt1.position.x += +1;
+                break;
+            case ROTATE_270:
+                pt1.position.x -= 1;
+                break;
+            case ROTATE_0:
+                if (op == RotateLeft) {
+                    pt1.position.x += 2;
+                } else {
+                    pt1.position.x -= 2;
+                }
+                break;
+            case ROTATE_180:
+                if (op == RotateLeft) {
+                    pt1.position.x += 1;
+                } else {
+                    pt1.position.x -= 1;
+                }
+                break;
+        }
+        if (is_mino_position_valid(field, pt1)) {
+            return pt1;
+        }
 
-    // 1
-    if (is_mino_position_valid(field, moved)) {
-        return moved;
-    }
-    switch (moved.rotate) {
-        case ROTATE_90:
-            moved.position.x -= 1;
-            break;
-        case ROTATE_270:
-            moved.position.x += 1;
-            break;
-        default:
-            if (mino.rotate == ROTATE_270) {
-                moved.position.x -= 1;
-            } else {
-                moved.position.x += 1;
-            }
-            break;
-    }
+        // 2
+        Mino pt2 = pt1;
+        switch (pt0.rotate) {
+            case ROTATE_90:
+                pt2.position.x = pt0.position.x - 2;
+                break;
+            case ROTATE_270:
+                pt2.position.x = pt0.position.x + 2;
+                break;
+            case ROTATE_0:
+                if (op == RotateLeft) {
+                    pt2.position.x = pt0.position.x - 1;
+                } else {
+                    pt2.position.x = pt0.position.x + 1;
+                }
+                break;
+            case ROTATE_180:
+                if (op == RotateLeft) {
+                    pt2.position.x = pt0.position.x - 2;
+                } else {
+                    pt2.position.x = pt0.position.x + 2;
+                }
+                break;
+        }
+        if (is_mino_position_valid(field, pt2)) {
+            return pt2;
+        }
 
-    // 2
-    if (is_mino_position_valid(field, moved)) {
-        return moved;
-    }
-    if (moved.rotate == ROTATE_90 || moved.rotate == ROTATE_270) {
-        moved.position.y -= 1;
+        // 3
+        Mino pt3 = pt2;
+        int rate = 1;
+        if (op == RotateRight) {
+            rate = 2;
+        }
+        switch (pt0.rotate) {
+            case ROTATE_90:
+                pt3.position.y = pt1.position.y + rate;
+                break;
+            case ROTATE_270:
+                pt3.position.y = pt1.position.y - rate;
+                break;
+            default:
+                if (mino.rotate == ROTATE_90) {
+                    pt3.position.y = pt1.position.y - rate;
+                } else {
+                    pt3.position.y = pt2.position.y + rate;
+                }
+                break;
+        }
+        if (is_mino_position_valid(field, pt3)) {
+            return pt3;
+        }
+
+        // 4
+        Mino pt4 = pt3;
+        rate = 1;
+        if (op == RotateLeft) {
+            rate = 2;
+        }
+        switch (pt0.rotate) {
+            case ROTATE_90:
+                pt4.position.y = pt2.position.y - rate;
+                break;
+            case ROTATE_270:
+                pt4.position.y = pt2.position.y + rate;
+                break;
+            default:
+                if (mino.rotate == ROTATE_90) {
+                    pt4.position.y = pt2.position.y + rate;
+                } else {
+                    pt4.position.y = pt1.position.y - rate;
+                }
+                break;
+        }
+        return pt4;
     } else {
-        moved.position.y += 1;
-    }
+        // 0
+        Mino moved = move_mino(mino, op);
+        if (is_mino_position_valid(field, moved)) {
+            return moved;
+        }
 
-    // 3
-    if (is_mino_position_valid(field, moved)) {
-        return moved;
-    }
-    moved = move_mino(mino, op);
-    if (moved.rotate == ROTATE_90 || moved.rotate == ROTATE_270) {
-        moved.position.y += 2;
-    } else {
-        moved.position.y -= 2;
-    }
-
-    // 4
-    if (is_mino_position_valid(field, moved)) {
-        return moved;
-    }
-    switch (moved.rotate) {
-        case ROTATE_90:
-            moved.position.x -= 1;
-            break;
-        case ROTATE_270:
-            moved.position.x += 1;
-            break;
-        default:
-            if (mino.rotate == ROTATE_270) {
+        // 1
+        switch (moved.rotate) {
+            case ROTATE_90:
                 moved.position.x -= 1;
-            } else {
+                break;
+            case ROTATE_270:
                 moved.position.x += 1;
-            }
-            break;
-    }
+                break;
+            default:
+                if (mino.rotate == ROTATE_270) {
+                    moved.position.x -= 1;
+                } else {
+                    moved.position.x += 1;
+                }
+                break;
+        }
+        if (is_mino_position_valid(field, moved)) {
+            return moved;
+        }
 
-    return moved;
+        // 2
+        if (moved.rotate == ROTATE_90 || moved.rotate == ROTATE_270) {
+            moved.position.y -= 1;
+        } else {
+            moved.position.y += 1;
+        }
+        if (is_mino_position_valid(field, moved)) {
+            return moved;
+        }
+
+        // 3
+        moved = move_mino(mino, op);
+        if (moved.rotate == ROTATE_90 || moved.rotate == ROTATE_270) {
+            moved.position.y += 2;
+        } else {
+            moved.position.y -= 2;
+        }
+        if (is_mino_position_valid(field, moved)) {
+            return moved;
+        }
+
+        // 4
+        switch (moved.rotate) {
+            case ROTATE_90:
+                moved.position.x -= 1;
+                break;
+            case ROTATE_270:
+                moved.position.x += 1;
+                break;
+            default:
+                if (mino.rotate == ROTATE_270) {
+                    moved.position.x -= 1;
+                } else {
+                    moved.position.x += 1;
+                }
+                break;
+        }
+
+        return moved;
+    }
 }
 
 bool is_mino_position_valid(bool field[20][10], Mino mino) {
