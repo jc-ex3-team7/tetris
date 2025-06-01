@@ -119,7 +119,7 @@ static void handle_lock_delay_phase(State *state) {
     }
 }
 
-Output next_state(State current_state, Operation op, int attack_lines) {  // TODO: handle attack_lines
+Output next_state(State current_state, Operation op, int attack_lines) {
     Output res = {0};
     res.state = current_state;
     current_state.attack_lines += attack_lines;
